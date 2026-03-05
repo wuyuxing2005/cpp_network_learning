@@ -26,7 +26,8 @@ int main()
 
     while (1)
     {
-        int eplen = my_epoll.wait();
+        std::vector<epoll_event> ev_fds = my_epoll.poll();
+        int eplen = ev_fds.size();
         if (eplen == -1)
         {
             if (errno == EINTR)
@@ -37,10 +38,9 @@ int main()
             break;
         }
 
-        std::vector<epoll_event> events = my_epoll.getEvnets();
         for (int i = 0; i < eplen; i += 1)
         {
-            int fd = events[i].data.fd;
+            int fd = ev_fds[i].data.fd;
             if (fd == socket_fd)
             {
                 while (1)
@@ -49,6 +49,7 @@ int main()
                     int client_fd = server_socket.accept(&client_sc_addr);
                     if (client_fd == -1)
                     {
+
                         if (errno == EAGAIN || errno == EWOULDBLOCK)
                         {
                             break;
