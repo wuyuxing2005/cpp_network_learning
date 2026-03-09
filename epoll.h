@@ -1,11 +1,15 @@
+#pragma once
+
 #include <sys/epoll.h>
 #include <vector>
-#include <fcntl.h>
+#include <unistd.h>
+#include "channel.h"
 #define MAX_EVENTS 1024
+
 class epoll
 {
 private:
-    std::vector<epoll_event> ev_fds;//存放epoll_wait得到的所有的fd
+    std::vector<epoll_event> evs; // 存放所有有事件发生的fd
     int epfd;
 
 public:
@@ -13,6 +17,7 @@ public:
     void epoll_add(int sock_fd, uint32_t events);
     void epoll_del(int sock_fd, uint32_t events);
     void epoll_mod(int sock_fd, uint32_t events);
-    std::vector<epoll_event> poll();
+    void updateChannel(channel *ch);
+    std::vector<channel *> poll();
     ~epoll();
 };

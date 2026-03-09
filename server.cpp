@@ -6,13 +6,13 @@
 #include "epoll.h"
 #include "errif.h"
 #include "mysocket.h"
-
 #define MAX_BUFFER_SIZE 1024
-
+std::unordered_map<int, uint16_t> ports;
+void handleReadEvent(int fd);
 int main()
 {
     epoll my_epoll;
-    std::unordered_map<int, uint16_t> ports;
+
     mysocket server_socket;
     sock_addr server_addr("127.0.0.1", 9999);
 
@@ -21,100 +21,65 @@ int main()
     errif(server_socket.listen() == -1, "listen");
 
     int socket_fd = server_socket.getFd();
-    my_epoll.epoll_add(socket_fd, EPOLLIN | EPOLLET);
+    channel *ch = new channel(&my_epoll, socket_fd);
+    ch->enAbleToReading();
     std::cout << "Server listening on 127.0.0.1:9999" << std::endl;
-
     while (1)
     {
-        std::vector<epoll_event> ev_fds = my_epoll.poll();
-        int eplen = ev_fds.size();
-        if (eplen == -1)
+        std::vector<channel *> channels = my_epoll.poll();
+        for (int i = 0; i < channels.size(); i += 1)
         {
-            if (errno == EINTR)
+            if (channels[i]->getFd() == socket_fd)
             {
-                continue;
+                sock_addr sc_addr;
+                int client_fd = server_socket.accept(&sc_addr);
+                setnonblocking(client_fd);
+                channel *client_ch = new channel(&my_epoll, client_fd);
+                client_ch->enAbleToReading();
+                uint16_t port = ntohs(sc_addr.getAddr().sin_port);
+                ports[client_fd] = port;
+                std::cout << "Client connected. ip: " << network_to_shifen(sc_addr.getAddr().sin_addr.s_addr) << " port: " << port << std::endl;
             }
-            perror("epoll_wait");
+            else if (channels[i]->getRevents() & EPOLLIN)
+            {
+                handleReadEvent(channels[i]->getFd());
+            }
+        }
+    }
+    delete ch;
+    return 0;
+}
+void handleReadEvent(int fd)
+{
+    char buffer[MAX_BUFFER_SIZE];
+    while (1)
+    {
+        memset(buffer, '\0', sizeof(buffer));
+        int s = recv(fd, buffer, MAX_BUFFER_SIZE, 0);
+        if (s == 0)
+        {
+            std::cout << "client " << ports[fd] << " quit" << std::endl;
+            close(fd);
             break;
         }
-
-        for (int i = 0; i < eplen; i += 1)
+        else if (s > 0)
         {
-            int fd = ev_fds[i].data.fd;
-            if (fd == socket_fd)
-            {
-                while (1)
-                {
-                    sock_addr client_sc_addr;
-                    int client_fd = server_socket.accept(&client_sc_addr);
-                    if (client_fd == -1)
-                    {
-
-                        if (errno == EAGAIN || errno == EWOULDBLOCK)
-                        {
-                            break;
-                        }
-                        if (errno == EINTR)
-                        {
-                            continue;
-                        }
-                        perror("accept");
-                        break;
-                    }
-
-                    if (setnonblocking(client_fd) == -1)
-                    {
-                        perror("setnonblocking client fd");
-                        close(client_fd);
-                        continue;
-                    }
-
-                    my_epoll.epoll_add(client_fd, EPOLLIN | EPOLLET);
-                    uint16_t port = ntohs(client_sc_addr.getAddr().sin_port);
-                    ports[client_fd] = port;
-                    std::cout << "Client connected. ip: " << network_to_shifen(client_sc_addr.getAddr().sin_addr.s_addr) << " port: " << port << std::endl;
-                }
-            }
-            else
-            {
-                char buffer[MAX_BUFFER_SIZE];
-                while (1)
-                {
-                    memset(buffer, 0, sizeof(buffer));
-                    ssize_t s = recv(fd, buffer, sizeof(buffer) - 1, 0);
-                    if (s == 0)
-                    {
-                        my_epoll.epoll_del(fd, EPOLLIN | EPOLLET);
-                        close(fd);
-                        ports.erase(fd);
-                        std::cout << "Client quit" << std::endl;
-                        break;
-                    }
-                    else if (s > 0)
-                    {
-                        buffer[s] = '\0';
-                        std::cout << "Server receive: " << buffer << " from Client: " << ports[fd] << std::endl;
-                        const char message[] = "Hello!";
-                        send(fd, message, strlen(message), 0);
-                    }
-                    else if (errno == EAGAIN || errno == EWOULDBLOCK)
-                    {
-                        break;
-                    }
-                    else if (errno == EINTR)
-                    {
-                        continue;
-                    }
-                    else
-                    {
-                        perror("recv");
-                        my_epoll.epoll_del(fd, EPOLLIN | EPOLLET);
-                        close(fd);
-                        ports.erase(fd);
-                        break;
-                    }
-                }
-            }
+            std::cout << "server recv : " << buffer << " from " << ports[fd] << std::endl;
+            memset(buffer, '\0', sizeof(buffer));
+            const char message[] = "Hello!";
+            send(fd, message, strlen(message), 0);
+        }
+        else if (s == -1 && (errno == EAGAIN || errno == EWOULDBLOCK))
+        {
+            break;
+        }
+        else if (s == -1 && (errno == EINTR))
+        {
+            continue;
+        }
+        else
+        {
+            break;
         }
     }
 }

@@ -1,7 +1,8 @@
 #include "epoll.h"
+
 epoll::epoll()
 {
-    ev_fds.resize(MAX_EVENTS);
+    evs.resize(MAX_EVENTS);
     epfd = epoll_create1(0);
 }
 void epoll::epoll_add(int sock_fd, uint32_t events)
@@ -25,11 +26,42 @@ void epoll::epoll_mod(int sock_fd, uint32_t events)
     ev.events = events;
     epoll_ctl(epfd, EPOLL_CTL_MOD, sock_fd, &ev);
 }
-std::vector<epoll_event> epoll::poll()
+std::vector<channel *> epoll::poll() // 获得当前所有有事件发生的文件描述符
 {
-    epoll_wait(epfd, ev_fds.data(), MAX_EVENTS, -1);
-    return this->ev_fds;
+    std::vector<channel *> chs;
+    int nfds = epoll_wait(epfd, evs.data(), MAX_EVENTS, -1);
+    if (nfds <= 0)
+    {
+        return chs;
+    }
+    for (int i = 0; i < nfds; i += 1)
+    {
+        channel *ch = (channel *)evs[i].data.ptr;
+        ch->setRevents(evs[i].events);
+        chs.push_back(ch);
+    }
+    return chs;
 }
+
+void epoll::updateChannel(channel *channel)
+{
+    epoll_event ev;
+    ev.data.ptr = channel;
+    ev.events = channel->getEvents();
+    if (!channel->getInepoll())
+    {
+        epoll_ctl(epfd, EPOLL_CTL_ADD, channel->getFd(), &ev);
+        channel->setInEpoll();
+    }
+    else
+    {
+        epoll_ctl(epfd, EPOLL_CTL_MOD, channel->getFd(), &ev);
+    }
+    return;
+}
+
+
 epoll::~epoll()
 {
+    close(epfd);
 }
