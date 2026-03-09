@@ -3,7 +3,7 @@
 mysocket::mysocket()
 {
     fd = socket(AF_INET, SOCK_STREAM, 0);
-    //此处不直接初始化非阻塞的原因是对于clientdua端
+    // 此处不直接初始化非阻塞的原因是对于clientdua端
 }
 int mysocket::bind(sock_addr *sc_addr)
 {
@@ -33,4 +33,14 @@ mysocket::~mysocket()
     {
         close(fd);
     }
+}
+
+int mysocket::setnonblocking()
+{
+    int flags = fcntl(this->fd, F_GETFL);
+    if (flags == -1)
+    {
+        return -1;
+    }
+    return fcntl(this->fd, F_SETFL, flags | O_NONBLOCK);
 }

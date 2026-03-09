@@ -1,8 +1,7 @@
 #include "channel.h"
 
-#include "epoll.h"
 
-channel::channel(epoll *_ev, int _fd) : ev(_ev), fd(_fd), inepoll(false), events(0), revents(0)
+channel::channel(EventLoop *_loop, int _fd) : loop(_loop), fd(_fd), inepoll(false), events(0), revents(0)
 {
 }
 
@@ -21,9 +20,9 @@ uint32_t channel::getEvents()
     return events;
 }
 
-epoll *channel::getEv()
+EventLoop *channel::getEvLoop()
 {
-    return ev;
+    return loop;
 }
 
 void channel::setInEpoll()
@@ -34,7 +33,7 @@ void channel::setInEpoll()
 void channel::enAbleToReading() // 把自己注册到epoll中
 {
     events = EPOLLIN | EPOLLET; // 说明自己想要进行读操作，后面会有别enAbleToXXX，此处会修改为别的
-    ev->updateChannel(this);
+    loop->updateChannel(this);
 }
 
 void channel::setRevents(uint32_t _revents)
@@ -47,4 +46,12 @@ uint32_t channel::getRevents()
 }
 channel::~channel()
 {
+}
+std::function<void()> channel::handleEventByCallBack()
+{
+    CallBack();
+}
+void channel::setCallBack(std::function<void()> callback)
+{
+    this->CallBack = callback;
 }

@@ -3,7 +3,7 @@
 #include <netinet/in.h>
 #include <unistd.h>
 #include "sock_addr.h"
-#include "set_noblocking.h"
+#include <fcntl.h>
 class mysocket
 {
 private:
@@ -16,5 +16,6 @@ public:
     int connect(sock_addr *sock_addr);
     int accept(sock_addr *sc_addr);
     int getFd();
+    int setnonblocking();
     ~mysocket();
 };
