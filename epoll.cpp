@@ -1,5 +1,6 @@
 #include "epoll.h"
 
+
 epoll::epoll()
 {
     evs.resize(MAX_EVENTS);
@@ -59,7 +60,6 @@ void epoll::updateChannel(channel *channel)
     }
     return;
 }
-
 
 epoll::~epoll()
 {

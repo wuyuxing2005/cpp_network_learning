@@ -1,4 +1,7 @@
 #include "channel.h"
+#include "EventLoop.h"
+
+#include <sys/epoll.h>
 
 
 channel::channel(EventLoop *_loop, int _fd) : loop(_loop), fd(_fd), inepoll(false), events(0), revents(0)
@@ -47,7 +50,7 @@ uint32_t channel::getRevents()
 channel::~channel()
 {
 }
-std::function<void()> channel::handleEventByCallBack()
+void channel::handleEventByCallBack()
 {
     CallBack();
 }

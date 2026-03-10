@@ -1,4 +1,5 @@
-#include "epoll.h"
+#pragma once
+class epoll;
 class channel;
 class EventLoop
 {
@@ -10,25 +11,4 @@ public:
     ~EventLoop();
     void beginLoop();
     void updateChannel(channel *ch);
-    void newConnect();
 };
-EventLoop::EventLoop()
-{
-    ev = new epoll();
-}
-EventLoop::~EventLoop()
-{
-}
-
-void EventLoop::updateChannel(channel *ch)
-{
-    ev->updateChannel(ch);
-}
-void EventLoop::beginLoop()
-{
-    std::vector<channel *> chs = ev->poll();
-    for (channel *ch : chs)
-    {
-        ch->handleEventByCallBack();
-    }
-}

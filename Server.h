@@ -1,35 +1,21 @@
+#pragma once
 #include "EventLoop.h"
 #include "channel.h"
 #include "mysocket.h"
 #include "sock_addr.h"
+#include <iostream>
+#include "set_noblocking.h"
+#include <cstring>
+#define MAX_BUFFER_SIZE 1024
 class Server
 {
 private:
     EventLoop *loop;
 
 public:
-    Server(EventLoop *loop);
-    void newConnection(mysocket *my_socket);
-    void enAbleReading(mysocket *my_socket);
+    Server(EventLoop *_loop);
+    void start();
+    void newConnection(mysocket *mysc);
+    void handleReadingEvent(int client_fd);
     ~Server();
 };
-
-Server ::Server(EventLoop *loop)
-{
-    sock_addr *sc_addr = new sock_addr("127.0.0.1", 9999);
-    mysocket *mysc = new mysocket();
-    mysc->bind(sc_addr);
-    mysc->listen();
-    mysc->setnonblocking();
-    EventLoop *loop = new EventLoop();
-    channel *ch = new channel(loop, mysc->getFd());
-    ch->setCallBack(std::bind(Server::newConnection, this, mysc));
-    loop->beginLoop();
-}
-Server::~Server()
-{
-}
-void Server::newConnection(channel *ch)
-{
-    sock_addr *sock_addr;
-}

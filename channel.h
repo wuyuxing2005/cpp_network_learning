@@ -1,8 +1,9 @@
 #pragma once
-#include "EventLoop.h"
-#include <sys/epoll.h>
+#include <cstdint>
 #include <functional>
-class EventLoop; // 前向声明，否则会出现双重依赖
+
+class EventLoop;
+
 class channel
 {
 private:
@@ -26,7 +27,7 @@ public:
     void disbaleToReading();
     void setRevents(uint32_t _revents);
     void setCallBack(std::function<void()> CallBack);
-    std::function<void()> handleEventByCallBack();
+    void handleEventByCallBack();
     uint32_t getRevents();
     ~channel();
 };

@@ -5,6 +5,9 @@ mysocket::mysocket()
     fd = socket(AF_INET, SOCK_STREAM, 0);
     // 此处不直接初始化非阻塞的原因是对于clientdua端
 }
+mysocket::mysocket(int _fd) : fd(_fd)
+{
+}
 int mysocket::bind(sock_addr *sc_addr)
 {
     return ::bind(fd, (sockaddr *)&(sc_addr->getAddr()), sizeof(sc_addr->getAddr()));

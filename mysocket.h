@@ -11,6 +11,7 @@ private:
 
 public:
     mysocket();
+    mysocket(int _fd);
     int bind(sock_addr *sc_addr);
     int listen();
     int connect(sock_addr *sock_addr);

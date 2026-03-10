@@ -6,6 +6,8 @@
 #include "channel.h"
 #define MAX_EVENTS 1024
 
+class channel;
+
 class epoll
 {
 private:
