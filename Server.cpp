@@ -2,14 +2,8 @@
 Server ::Server(EventLoop *_loop)
 {
     this->loop = _loop;
-    sock_addr *sc_addr = new sock_addr("127.0.0.1", 9999);
-    mysocket *mysc = new mysocket();
-    mysc->bind(sc_addr);
-    mysc->listen();
-    mysc->setnonblocking();
-    channel *ch = new channel(this->loop, mysc->getFd());           // 监听channel
-    ch->setCallBack(std::bind(&Server::newConnection, this, mysc)); // 绑定监听channel 与建立连接操作函数
-    ch->enAbleToReading();                                          // 此处不要忘了写！   此处是把监听channel加入到loop的epoll中，上面的setCallback的操作中的enAbleToReading()是将client的连接channel注册到loop中。
+    apt = new Acceptor(_loop);
+    apt->setConnectionCallBack(std::bind(&Server::newConnection, this, std::placeholders::_1));
 }
 Server::~Server()
 {
