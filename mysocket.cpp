@@ -4,8 +4,6 @@
 mysocket::mysocket()
 {
     fd = socket(AF_INET, SOCK_STREAM, 0);
-    errif(fd == -1, "socket create error");
-    // 此处不直接初始化非阻塞的原因是对于clientdua端
 }
 mysocket::mysocket(int _fd) : fd(_fd)
 {
