@@ -1,15 +1,17 @@
 #include "Connection.h"
-Connection::Connection(EventLoop *_loop, mysocket *_mysc)
+Connection::Connection(EventLoop *_loop, mysocket *_mysc) // 负责连接socket（channel）的处理
 {
     this->loop = _loop;
     mysc = _mysc;
-    channel *ch = new channel(loop, mysc->getFd());
+    ch = new channel(loop, mysc->getFd());
     ch->setCallBack(std::bind(&Connection::echo, this));
     ch->enAbleToReading();
 }
 
 Connection::~Connection()
 {
+    close(mysc->getFd());
+    delete mysc;
 }
 void Connection::echo()
 {
@@ -21,7 +23,7 @@ void Connection::echo()
         if (bytes_read > 0) // 正常读取数据
         {
             std::cout << "Server recv message " << buffer << std::endl;
-            const char *message = "Hello";
+            const char *message = buffer;
             send(mysc->getFd(), message, strlen(message), 0);
             continue; // continue的原因是不知道当前是否读取完毕了，因此需要继续循环看是否读完了，对应于ifelse第三种情况
         }
@@ -29,7 +31,6 @@ void Connection::echo()
         {
             std::cout << "Client quit" << std::endl;
             deleteCallBack(mysc);
-            close(mysc->getFd());
             break;
         }
         else if (bytes_read < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) // 读完了

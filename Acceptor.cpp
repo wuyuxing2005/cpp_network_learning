@@ -19,7 +19,8 @@ void Acceptor::accpetNewConnection() // 启动accpetor
     int client_fd = socket->accept(sc_addr);
     setnonblocking(client_fd);
     std::cout << "Accept From " << "Port : " << sc_addr->getAddr().sin_port << " ip: " << network_to_shifen(sc_addr->getAddr().sin_addr.s_addr) << std::endl;
-    CallBack(this->socket);
+    mysocket *client_socket = new mysocket(client_fd);
+    CallBack(client_socket); // 使用Server中的newconnection
 }
 
 void Acceptor::setConnectionCallBack(std::function<void(mysocket *sc)> _CallBack) // 启动前需要初始化CallBack

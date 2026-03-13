@@ -13,6 +13,7 @@ class Connection
 private:
     EventLoop *loop;
     mysocket *mysc;
+    channel *ch;
     std::function<void(mysocket *mysc)> deleteCallBack;
 
 public:

@@ -24,6 +24,6 @@ void Server::newConnection(mysocket *mysc)
 void Server::deleteConnection(mysocket *mysc)
 {
     Connection *con = connections[mysc->getFd()];
-    delete con;
     connections.erase(mysc->getFd());
+    delete con;
 }
