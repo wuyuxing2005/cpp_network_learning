@@ -10,7 +10,6 @@ int main()
     // socket->setnonblocking();
     sock_addr *sockaddr = new sock_addr("127.0.0.1", 9999);
     socket->connect(sockaddr);
-
     std::string input;
     while (getline(std::cin, input))
     {
@@ -20,7 +19,6 @@ int main()
             std::cout << "Nothing to send" << std::endl;
             break;
         }
-
         char buffer[MAX_BUFFER_SIZE];
         memset(buffer, '\0', sizeof(buffer));
         // sleep(1); 如果初始化socket为非阻塞，那么最好sleep一段时间，以便server正确回传hello
@@ -35,16 +33,12 @@ int main()
             std::cout << "Server closed connection" << std::endl;
             break;
         }
-        else if (errno == EAGAIN || errno == EWOULDBLOCK)
-        {
-            continue;
-        }
         else
         {
             perror("recv failed");
             break;
         }
     }
-    close(socket->getFd());
+    delete socket;
     return 0;
 }
