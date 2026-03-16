@@ -20,7 +20,6 @@ void Server::newConnection(mysocket *mysc)
     connection->setDeleteConnectionCallBack(std::bind(&Server::deleteConnection, this, std::placeholders::_1));
     connections[mysc->getFd()] = connection;
 }
-  
 void Server::deleteConnection(mysocket *mysc)
 {
     Connection *con = connections[mysc->getFd()];

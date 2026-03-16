@@ -4,7 +4,7 @@
 
 class EventLoop;
 
-class channel
+class channel // 实际上封装的是注册到epoll的ev
 {
 private:
     EventLoop *loop;

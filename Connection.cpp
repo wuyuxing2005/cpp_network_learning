@@ -24,7 +24,6 @@ void Connection::echo()
         ssize_t bytes_read = recv(mysc->getFd(), buffer, MAX_BUFFER_SIZE, 0);
         if (bytes_read > 0) // 正常读取数据
         {
-
             readBuffer->append(buffer, bytes_read);
             continue; // continue的原因是不知道当前是否读取完毕了，因此需要继续循环看是否读完了，对应于ifelse第三种情况
         }

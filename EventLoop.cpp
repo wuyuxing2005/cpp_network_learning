@@ -1,32 +1,32 @@
 #include "EventLoop.h"
-#include "channel.h"
-#include "epoll.h"
-
-#include <vector>
-
 EventLoop::EventLoop()
 {
-    ev = new epoll();
+    ep = new epoll();
+    thread_pool = new Thread_pool<std::function<void()>>(10, 10);
 }
 
 EventLoop::~EventLoop()
 {
-    delete ev;
+    delete ep;
 }
 
 void EventLoop::updateChannel(channel *ch)
 {
-    ev->updateChannel(ch);
+    ep->updateChannel(ch);
 }
 
 void EventLoop::beginLoop()
 {
     while (1)
     {
-        std::vector<channel *> chs = ev->poll();
+        std::vector<channel *> chs = ep->poll();
         for (channel *ch : chs)
         {
             ch->handleEventByCallBack();
         }
     }
+}
+void EventLoop::addInPoll(std::function<void()>* CallBack)
+{
+    thread_pool->append(CallBack);
 }

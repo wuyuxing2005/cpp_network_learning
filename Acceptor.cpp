@@ -24,7 +24,7 @@ void Acceptor::accpetNewConnection() // 启动accpetor
 }
 
 void Acceptor::setConnectionCallBack(std::function<void(mysocket *sc)> _CallBack) // 启动前需要初始化CallBack
-{
+{ 
     this->CallBack = _CallBack; // 将connextion的创建交给Server
     // 原因是因为Accpetor只负责监听与accpet，是负责一种机制，accpet之后获得的fd已经和监听fd（Accpetor）无关了，后续连接的操作应该由Server管理
 }

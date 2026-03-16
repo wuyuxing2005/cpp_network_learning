@@ -3,7 +3,6 @@
 
 #include <sys/epoll.h>
 
-
 channel::channel(EventLoop *_loop, int _fd) : loop(_loop), fd(_fd), inepoll(false), events(0), revents(0)
 {
 }
@@ -45,14 +44,14 @@ void channel::setRevents(uint32_t _revents)
 }
 uint32_t channel::getRevents()
 {
-    return revents;
+    return revents; 
 }
 channel::~channel()
 {
 }
 void channel::handleEventByCallBack()
 {
-    CallBack();
+    loop->addInPoll(&CallBack);
 }
 void channel::setCallBack(std::function<void()> callback)
 {
