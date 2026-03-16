@@ -6,12 +6,14 @@ Connection::Connection(EventLoop *_loop, mysocket *_mysc) // 负责连接socket�
     ch = new channel(loop, mysc->getFd());
     ch->setCallBack(std::bind(&Connection::echo, this));
     ch->enAbleToReading();
+    readBuffer = new Buffer();
 }
 
 Connection::~Connection()
 {
     close(mysc->getFd());
     delete mysc;
+    delete readBuffer;
 }
 void Connection::echo()
 {
@@ -22,9 +24,8 @@ void Connection::echo()
         ssize_t bytes_read = recv(mysc->getFd(), buffer, MAX_BUFFER_SIZE, 0);
         if (bytes_read > 0) // 正常读取数据
         {
-            std::cout << "Server recv message " << buffer << std::endl;
-            const char *message = buffer;
-            send(mysc->getFd(), message, strlen(message), 0);
+
+            readBuffer->append(buffer, bytes_read);
             continue; // continue的原因是不知道当前是否读取完毕了，因此需要继续循环看是否读完了，对应于ifelse第三种情况
         }
         else if (bytes_read == 0) // 连接终止了
@@ -33,8 +34,11 @@ void Connection::echo()
             deleteCallBack(mysc);
             break;
         }
-        else if (bytes_read < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) // 读完了
+        else if (bytes_read == -1 && (errno == EAGAIN || errno == EWOULDBLOCK)) // 读完了
         {
+            std::cout << "Server recv message " << readBuffer->getString() << std::endl;
+            send(mysc->getFd(), readBuffer->getChar_c(), readBuffer->getSize(), 0);
+            readBuffer->clear_s();
             break;
         }
         else

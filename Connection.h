@@ -4,7 +4,8 @@
 #include "channel.h"
 #include <cstring>
 #include <iostream>
-#define MAX_BUFFER_SIZE 1024
+#include "Buffer.h"
+#define MAX_BUFFER_SIZE 10
 class channel;
 class EventLoop;
 class mysocket;
@@ -15,6 +16,7 @@ private:
     mysocket *mysc;
     channel *ch;
     std::function<void(mysocket *mysc)> deleteCallBack;
+    Buffer *readBuffer;
 
 public:
     Connection(EventLoop *_loop, mysocket *_mysc);

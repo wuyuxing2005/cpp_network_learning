@@ -1,9 +1,10 @@
+
 #include "mysocket.h"
 #include <iostream>
 #include <cstring>
 #include "Buffer.h"
 #include <sys/epoll.h>
-#define MAX_BUFFER_SIZE 1024
+#define MAX_BUFFER_SIZE 10
 
 int main()
 {
@@ -12,15 +13,17 @@ int main()
     socket->setnonblocking();
     sock_addr *sockaddr = new sock_addr("127.0.0.1", 9999);
     socket->connect(sockaddr);
-    std::string input;
+    Buffer *sendbuffer = new Buffer(); // 仅仅用于写入你想发送给server的信息
+    Buffer *readbuffer = new Buffer(); // 仅仅用于你想接收的从server的数据
     int epfd = epoll_create1(0);
     epoll_event ev, evs[1];
     ev.data.fd = socket->getFd();
     ev.events = EPOLLIN | EPOLLET;
     epoll_ctl(epfd, EPOLL_CTL_ADD, socket->getFd(), &ev);
-    while (getline(std::cin, input))
+    while (sendbuffer->inputLine())
     {
-        send(socket->getFd(), input.c_str(), input.size(), 0);
+        send(socket->getFd(), sendbuffer->getChar_c(), sendbuffer->getSize(), 0);
+        sendbuffer->clear_s();        // 清除数据
         epoll_wait(epfd, evs, 1, -1); // 一定要设置成-1；表示一直wait阻塞等待
         char buffer[MAX_BUFFER_SIZE];
         while (1)
@@ -29,16 +32,21 @@ int main()
             ssize_t s = recv(socket->getFd(), buffer, sizeof(buffer), 0);
             if (s > 0)
             {
-                std::cout << "Receive message from server " << buffer << std::endl;
+                readbuffer->append(buffer, s);
+                continue;
             }
             else if (s == 0)
             {
                 std::cout << "connection close" << std::endl;
                 close(socket->getFd());
+                delete readbuffer;
+                delete sendbuffer;
                 return 0;
             }
             else if (s < 0 && (errno == EAGAIN || errno == EWOULDBLOCK))
             {
+                std::cout << "Receive message from server " << readbuffer->getString() << std::endl;
+                readbuffer->clear_s();
                 break; // 读完了
             }
             else
