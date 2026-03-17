@@ -60,6 +60,15 @@ void epoll::updateChannel(channel *channel)
     return;
 }
 
+void epoll::deleteChannel(channel *channel)
+{
+    if (channel == nullptr || !channel->getInepoll())
+    {
+        return;
+    }
+    epoll_ctl(epfd, EPOLL_CTL_DEL, channel->getFd(), nullptr);
+}
+
 epoll::~epoll()
 {
     close(epfd);

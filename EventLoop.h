@@ -18,5 +18,6 @@ public:
     ~EventLoop();
     void beginLoop();
     void updateChannel(channel *ch);
-    void addInPoll(std::function<void()> *CallBack);
+    void deleteChannel(channel *ch);
+    bool addInPoll(std::function<void()> CallBack);
 };

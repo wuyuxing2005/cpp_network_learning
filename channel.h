@@ -15,9 +15,11 @@ private:
     // 但是不包括不同Sokcet的本身的不同操作（指的是不同socket的操作，即回调函数内容）。这样可以做到更好的抽象
     uint32_t events;
     uint32_t revents;
+    bool useThreadPoll;
+    bool useET;
 
 public:
-    channel(EventLoop *_loop, int _fd);
+    channel(EventLoop *_loop, int _fd, bool _useThreadPoll, bool _useET);
     int getFd();
     bool getInepoll();
     uint32_t getEvents();

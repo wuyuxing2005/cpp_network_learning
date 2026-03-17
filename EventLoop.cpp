@@ -2,7 +2,7 @@
 EventLoop::EventLoop()
 {
     ep = new epoll();
-    thread_pool = new Thread_pool<std::function<void()>>(10, 10);
+    thread_pool = new Thread_pool<std::function<void()>>(10, 1000);
 }
 
 EventLoop::~EventLoop()
@@ -13,6 +13,11 @@ EventLoop::~EventLoop()
 void EventLoop::updateChannel(channel *ch)
 {
     ep->updateChannel(ch);
+}
+
+void EventLoop::deleteChannel(channel *ch)
+{
+    ep->deleteChannel(ch);
 }
 
 void EventLoop::beginLoop()
@@ -26,7 +31,7 @@ void EventLoop::beginLoop()
         }
     }
 }
-void EventLoop::addInPoll(std::function<void()>* CallBack)
+bool EventLoop::addInPoll(std::function<void()> CallBack)
 {
-    thread_pool->append(CallBack);
+    return thread_pool->append(std::move(CallBack));
 }
