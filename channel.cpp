@@ -59,18 +59,8 @@ channel::~channel()
 }
 void channel::handleEventByCallBack()
 {
-    std::function<void()> callback = CallBack; // 先拷贝回调，避免后续对象销毁导致悬空引用。
-    if (useThreadPoll)
-    {
-        if (!loop->addInPoll(callback))
-        {
-            callback();
-        }
-    }
-    else
-    {
-        callback();
-    }
+    // std::function<void()> callback = CallBack; // 先拷贝回调，避免后续对象销毁导致悬空引用。
+    CallBack(); // 此处不需要再进行addthreadpoll，因为此时loop中不再存在线程池，loop直接监听即可
 }
 void channel::setCallBack(std::function<void()> callback)
 {

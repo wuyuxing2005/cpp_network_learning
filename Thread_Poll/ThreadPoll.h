@@ -1,3 +1,4 @@
+#pragma once
 #include "../lock/lock.h"
 #include <queue>
 #include <vector>
