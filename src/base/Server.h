@@ -25,11 +25,13 @@ private:
     std::vector<EventLoop *> subReactors;
     std::mutex connections_mtx;
     Thread_pool<std::function<void()>> *thread_pool;
+    std::function<void(Connection *)> Connect_Callback;
 
 public:
     Server(EventLoop *_loop);
     void start();
     void newConnection(mysocket *mysc);
     void deleteConnection(int fd);
+    void setConnect(std::function<void(Connection *)> _Connect_Callback);
     ~Server();
 };

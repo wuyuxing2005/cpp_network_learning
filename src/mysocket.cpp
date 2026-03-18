@@ -1,5 +1,5 @@
-#include "mysocket.h"
-#include "errif.h"
+#include "base/mysocket.h"
+#include "base/errif.h"
 
 mysocket::mysocket()
 {

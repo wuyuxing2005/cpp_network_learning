@@ -1,5 +1,5 @@
-#include "mysocket.h"
-#include "sock_addr.h"
+#include "src/base/mysocket.h"
+#include "src/base/sock_addr.h"
 
 #include <getopt.h>
 #include <sys/socket.h>
@@ -11,67 +11,68 @@
 #include <thread>
 #include <vector>
 
-namespace {
-
-constexpr const char *kHost = "127.0.0.1";
-constexpr uint16_t kPort = 9999;
-constexpr const char *kMessage = "I'm client!";
-
-void oneClient(int msgs, int wait_seconds)
+namespace
 {
-    mysocket socket;
-    sock_addr addr(kHost, kPort);
 
-    if (socket.connect(&addr) == -1)
+    constexpr const char *kHost = "127.0.0.1";
+    constexpr uint16_t kPort = 9999;
+    constexpr const char *kMessage = "I'm client!";
+
+    void oneClient(int msgs, int wait_seconds)
     {
-        perror("socket connect error");
-        return;
-    }
+        mysocket socket;
+        sock_addr addr(kHost, kPort);
 
-    if (wait_seconds > 0)
-    {
-        sleep(wait_seconds);
-    }
-
-    const std::string message = kMessage;
-    std::string read_buffer;
-    read_buffer.reserve(message.size());
-
-    for (int count = 0; count < msgs; ++count)
-    {
-        ssize_t write_bytes = send(socket.getFd(), message.data(), message.size(), 0);
-        if (write_bytes == -1)
+        if (socket.connect(&addr) == -1)
         {
-            perror("socket write error");
-            break;
-        }
-
-        read_buffer.clear();
-        while (static_cast<int>(read_buffer.size()) < static_cast<int>(message.size()))
-        {
-            char buf[1024];
-            ssize_t read_bytes = recv(socket.getFd(), buf, sizeof(buf), 0);
-            if (read_bytes > 0)
-            {
-                read_buffer.append(buf, read_bytes);
-                continue;
-            }
-            if (read_bytes == 0)
-            {
-                std::cout << "server disconnected!" << std::endl;
-                return;
-            }
-            if (errno == EINTR)
-            {
-                continue;
-            }
-            perror("socket read error");
+            perror("socket connect error");
             return;
         }
 
-        std::cout << "count: " << count << ", message from server: " << read_buffer << std::endl;
+        if (wait_seconds > 0)
+        {
+            sleep(wait_seconds);
+        }
+
+        const std::string message = kMessage;
+        std::string read_buffer;
+        read_buffer.reserve(message.size());
+
+        for (int count = 0; count < msgs; ++count)
+        {
+            ssize_t write_bytes = send(socket.getFd(), message.data(), message.size(), 0);
+            if (write_bytes == -1)
+            {
+                perror("socket write error");
+                break;
+            }
+
+            read_buffer.clear();
+            while (static_cast<int>(read_buffer.size()) < static_cast<int>(message.size()))
+            {
+                char buf[1024];
+                ssize_t read_bytes = recv(socket.getFd(), buf, sizeof(buf), 0);
+                if (read_bytes > 0)
+                {
+                    read_buffer.append(buf, read_bytes);
+                    continue;
+                }
+                if (read_bytes == 0)
+                {
+                    std::cout << "server disconnected!" << std::endl;
+                    return;
+                }
+                if (errno == EINTR)
+                {
+                    continue;
+                }
+                perror("socket read error");
+                return;
+            }
+
+            std::cout << "count: " << count << ", message from server: " << read_buffer << std::endl;
+        }
     }
-}
 
 } // namespace
 

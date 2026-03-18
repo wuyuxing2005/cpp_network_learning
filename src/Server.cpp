@@ -1,5 +1,5 @@
-#include "Server.h"
-#include "Connection.h"
+#include "base/Server.h"
+#include "base/Connection.h"
 #include <bits/std_thread.h>
 Server ::Server(EventLoop *_loop)
 {
@@ -52,4 +52,8 @@ void Server::deleteConnection(int fd)
         con = it->second;
         connections.erase(it);
     }
+}
+void Server::setConnect(std::function<void(Connection *)> _Connect_Callback)
+{
+    Connect_Callback = _Connect_Callback;
 }
