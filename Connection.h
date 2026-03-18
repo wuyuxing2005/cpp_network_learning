@@ -20,6 +20,7 @@ private:
     channel *ch;
     std::function<void(int)> deleteCallBack;
     Buffer *readBuffer;
+    Buffer *sendBuffer;
     std::mutex conn_mtx;
 
 public:

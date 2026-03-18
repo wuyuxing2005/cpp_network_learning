@@ -5,6 +5,7 @@ Connection::Connection(EventLoop *_loop, mysocket *_mysc) // 负责连接socket�
     mysc = _mysc;
     ch = new channel(loop, mysc->getFd(), true, true);
     readBuffer = new Buffer();
+    sendBuffer = new Buffer();
 }
 
 Connection::~Connection()
@@ -16,6 +17,7 @@ Connection::~Connection()
     delete ch;
     delete mysc;
     delete readBuffer;
+    delete sendBuffer;
 }
 
 void Connection::registerCallBack()
@@ -54,8 +56,13 @@ void Connection::echo()
         else if (bytes_read == -1 && (errno == EAGAIN || errno == EWOULDBLOCK)) // 读完了
         {
             std::cout << "Server recv message " << readBuffer->getString() << std::endl;
-            send(mysc->getFd(), readBuffer->getChar_c(), readBuffer->getSize(), 0);
+            // 此处是sendBuffer填充逻辑
+            sendBuffer->append((char *)readBuffer->getChar_c(), readBuffer->getSize());
+            // 此处是sendBuffer填充逻辑
+
+            send(mysc->getFd(), sendBuffer->getChar_c(), sendBuffer->getSize(), 0);
             readBuffer->clear_s();
+            sendBuffer->clear_s();
             break;
         }
         else
