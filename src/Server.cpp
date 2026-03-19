@@ -34,7 +34,9 @@ void Server::newConnection(mysocket *mysc)
 {
     int random = mysc->getFd() % subReactors.size();
     std::shared_ptr<Connection> connection = std::make_shared<Connection>(subReactors[random], mysc);
+    connection->state_ = Connection::State::Connected;
     connection->setDeleteConnectionCallBack(std::bind(&Server::deleteConnection, this, std::placeholders::_1));
+    connection->setFunctionCallBack(Connect_Callback);
     connection->registerCallBack();
     std::lock_guard<std::mutex> guard(connections_mtx);
     connections[mysc->getFd()] = connection;

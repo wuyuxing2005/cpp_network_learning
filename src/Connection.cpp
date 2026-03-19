@@ -28,51 +28,113 @@ void Connection::registerCallBack()
         auto self = weak_self.lock();
         if (self)
         {
-            self->echo();
+            self->handleFunctionCallBack();
         }
     });
     ch->enAbleToReading();
 }
-
-void Connection::echo()
+void Connection::handleFunctionCallBack()
 {
-    // std::lock_guard<std::mutex> guard(conn_mtx);
+    functionCallBack(this);
+}
+void Connection::setFunctionCallBack(std::function<void(Connection *)> _functionCallBack)
+{
+    functionCallBack = _functionCallBack; // server.cpp中设置的函数。注意是小写s的server.cpp
+}
+
+void Connection::setDeleteConnectionCallBack(std::function<void(int)> CallBack)
+{
+    this->deleteCallBack = CallBack;
+}
+
+void Connection::setSendBuffer(std::string s)
+{
+    sendBuffer->clear_s();
+    sendBuffer->append((char *)s.c_str(), s.size());
+}
+
+std::string Connection::getReadBuffer()
+{
+    return readBuffer->getString();
+}
+void Connection::recv0()
+{
     char buffer[MAX_BUFFER_SIZE];
-    while (1) // 非阻塞状态需要一次读完
+    while (1)
     {
         memset(buffer, '\0', MAX_BUFFER_SIZE);
         ssize_t bytes_read = recv(mysc->getFd(), buffer, MAX_BUFFER_SIZE, 0);
-        if (bytes_read > 0) // 正常读取数据
+        if (bytes_read > 0)
         {
             readBuffer->append(buffer, bytes_read);
-            continue; // continue的原因是不知道当前是否读取完毕了，因此需要继续循环看是否读完了，对应于ifelse第三种情况
+            continue;
         }
-        else if (bytes_read == 0) // 连接终止了
+        else if (bytes_read == 0)
         {
-            std::cout << "Client quit" << std::endl;
-            deleteCallBack(mysc->getFd());
+            state_ = State::Closed;
             break;
         }
         else if (bytes_read == -1 && (errno == EAGAIN || errno == EWOULDBLOCK)) // 读完了
         {
-            std::cout << "Server recv message " << readBuffer->getString() << std::endl;
-            // 此处是sendBuffer填充逻辑
-            sendBuffer->append((char *)readBuffer->getChar_c(), readBuffer->getSize());
-            // 此处是sendBuffer填充逻辑
-
-            send(mysc->getFd(), sendBuffer->getChar_c(), sendBuffer->getSize(), 0);
-            readBuffer->clear_s();
-            sendBuffer->clear_s();
             break;
         }
         else
         {
             std::cout << "erro " << strerror(errno) << std::endl;
+            state_ = State::Failed;
             break;
         }
     }
 }
-void Connection::setDeleteConnectionCallBack(std::function<void(int)> CallBack)
+void Connection::send0()
 {
-    this->deleteCallBack = CallBack;
+    send(mysc->getFd(), sendBuffer->getChar_c(), sendBuffer->getSize(), 0);
+    readBuffer->clear_s();
+    sendBuffer->clear_s();
 }
+void Connection::close0()
+{
+    deleteCallBack(mysc->getFd());
+}
+mysocket *Connection::getsocket()
+{
+    return mysc;
+}
+// void Connection::echo()
+// {
+//     // std::lock_guard<std::mutex> guard(conn_mtx);
+//     char buffer[MAX_BUFFER_SIZE];
+//     while (1) // 非阻塞状态需要一次读完
+//     {
+//         memset(buffer, '\0', MAX_BUFFER_SIZE);
+//         ssize_t bytes_read = recv(mysc->getFd(), buffer, MAX_BUFFER_SIZE, 0);
+//         if (bytes_read > 0) // 正常读取数据
+//         {
+//             readBuffer->append(buffer, bytes_read);
+//             continue; // continue的原因是不知道当前是否读取完毕了，因此需要继续循环看是否读完了，对应于ifelse第三种情况
+//         }
+//         else if (bytes_read == 0) // 连接终止了
+//         {
+// std::cout << "Client quit" << std::endl;
+// deleteCallBack(mysc->getFd());
+// break;
+//         }
+//         else if (bytes_read == -1 && (errno == EAGAIN || errno == EWOULDBLOCK)) // 读完了
+//         {
+// std::cout << "Server recv message " << readBuffer->getString() << std::endl;
+// // 此处是sendBuffer填充逻辑
+// sendBuffer->append((char *)readBuffer->getChar_c(), readBuffer->getSize());
+// // 此处是sendBuffer填充逻辑
+
+// send(mysc->getFd(), sendBuffer->getChar_c(), sendBuffer->getSize(), 0);
+// readBuffer->clear_s();
+// sendBuffer->clear_s();
+// break;
+//         }
+//         else
+//         {
+//             std::cout << "erro " << strerror(errno) << std::endl;
+//             break;
+//         }
+//     }
+// }
