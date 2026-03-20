@@ -33,6 +33,7 @@ void Server::start() // 在创建实例后手动开启
 void Server::newConnection(mysocket *mysc)
 {
     int random = mysc->getFd() % subReactors.size();
+    mysc->setBlock(false);
     std::shared_ptr<Connection> connection = std::make_shared<Connection>(subReactors[random], mysc);
     connection->state_ = Connection::State::Connected;
     connection->setDeleteConnectionCallBack(std::bind(&Server::deleteConnection, this, std::placeholders::_1));

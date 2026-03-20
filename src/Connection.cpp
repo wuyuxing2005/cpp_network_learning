@@ -49,7 +49,7 @@ void Connection::setDeleteConnectionCallBack(std::function<void(int)> CallBack)
 
 void Connection::setSendBuffer(std::string s)
 {
-    sendBuffer->clear_s();
+    sendBuffer->clear_s(); // 清空sendBuffer
     sendBuffer->append((char *)s.c_str(), s.size());
 }
 
@@ -57,8 +57,37 @@ std::string Connection::getReadBuffer()
 {
     return readBuffer->getString();
 }
-void Connection::recv0()
+void Connection::BlockedRecv()
 {
+    char buffer[MAX_BUFFER_SIZE];
+    memset(buffer, '\0', MAX_BUFFER_SIZE);
+    ssize_t s = recv(mysc->getFd(), buffer, MAX_BUFFER_SIZE, 0);
+    if (s > 0)
+    {
+        readBuffer->append(buffer, s);
+    }
+    else if (s == 0)
+    {
+        state_ = State::Closed;
+    }
+    else
+    {
+        std::cout << "error " << strerror(errno) << std::endl;
+        state_ = State::Failed;
+    }
+}
+void Connection::BlockedSend()
+{
+    ssize_t s = send(mysc->getFd(), sendBuffer->getChar_c(), sendBuffer->getSize(), 0);
+    if (s == -1)
+    {
+        std::cout << "error " << strerror(errno) << std::endl;
+        state_ = State::Failed;
+    }
+}
+void Connection::noBlockedRecv()
+{
+
     char buffer[MAX_BUFFER_SIZE];
     while (1)
     {
@@ -80,17 +109,64 @@ void Connection::recv0()
         }
         else
         {
-            std::cout << "erro " << strerror(errno) << std::endl;
+            std::cout << "error " << strerror(errno) << std::endl;
             state_ = State::Failed;
             break;
         }
     }
 }
+void Connection::noBlockedSend()
+{
+    char buffer[sendBuffer->getSize()];
+    memccpy(buffer, sendBuffer->getChar_c(), sendBuffer->getSize(), sendBuffer->getSize());
+    int bytes_send = 0;
+    int size = sendBuffer->getSize();
+    while (bytes_send < size)
+    {
+        ssize_t s = send(mysc->getFd(), buffer + bytes_send, size - bytes_send, 0);
+        if (s > 0)
+        {
+            bytes_send += s;
+            continue;
+        }
+        else if (s == -1 && (errno == EWOULDBLOCK || errno == EAGAIN)) // 发完了
+        {
+            break;
+        }
+        else if (s == -1 && errno == EINTR) // 发送中断
+        {
+            continue;
+        }
+        else
+        {
+            std::cout << "error" << strerror(errno) << std::endl;
+            break;
+        }
+    }
+}
+void Connection::recv0()
+{
+    readBuffer->clear_s(); // 清空readBuffer
+    if (mysc->getIsBlocked())
+    {
+        BlockedRecv();
+    }
+    else
+    {
+        noBlockedRecv();
+    }
+}
 void Connection::send0()
 {
-    send(mysc->getFd(), sendBuffer->getChar_c(), sendBuffer->getSize(), 0);
-    readBuffer->clear_s();
-    sendBuffer->clear_s();
+    if (mysc->getIsBlocked())
+    {
+        BlockedSend();
+    }
+    else
+    {
+        noBlockedSend();
+    }
+    sendBuffer->clear_s(); // 清空sendBuffer
 }
 void Connection::close0()
 {

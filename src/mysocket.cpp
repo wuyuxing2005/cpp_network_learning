@@ -4,6 +4,7 @@
 mysocket::mysocket()
 {
     fd = socket(AF_INET, SOCK_STREAM, 0);
+    isBlocked = true;
 }
 mysocket::mysocket(int _fd) : fd(_fd)
 {
@@ -30,6 +31,10 @@ int mysocket::getFd()
 {
     return this->fd;
 }
+bool mysocket::getIsBlocked()
+{
+    return isBlocked;
+}
 mysocket::~mysocket()
 {
     if (fd >= 0)
@@ -37,7 +42,10 @@ mysocket::~mysocket()
         close(fd);
     }
 }
-
+void mysocket::setBlock(bool _isblocked)
+{
+    isBlocked = _isblocked;
+}
 int mysocket::setnonblocking()
 {
     int flags = fcntl(this->fd, F_GETFL);

@@ -8,6 +8,7 @@ class mysocket
 {
 private:
     int fd;
+    bool isBlocked;
 
 public:
     mysocket();
@@ -18,5 +19,7 @@ public:
     int accept(sock_addr *sc_addr);
     int getFd();
     int setnonblocking();
+    void setBlock(bool _isBlocked);
+    bool getIsBlocked();
     ~mysocket();
 };

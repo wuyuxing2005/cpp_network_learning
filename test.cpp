@@ -1,6 +1,6 @@
 #include "src/base/mysocket.h"
 #include "src/base/sock_addr.h"
-
+#include "src/base/Connection.h"
 #include <getopt.h>
 #include <sys/socket.h>
 #include <unistd.h>
