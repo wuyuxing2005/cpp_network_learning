@@ -1,10 +1,11 @@
-
+#pragma once
 #include "base/mysocket.h"
 #include <iostream>
 #include <cstring>
 #include "base/Buffer.h"
 #include <sys/epoll.h>
 #include <unistd.h>
+#include <memory>
 #define MAX_BUFFER_SIZE 10
 // 为clientIO阻塞版本
 int main()

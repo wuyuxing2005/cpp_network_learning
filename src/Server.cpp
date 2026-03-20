@@ -4,20 +4,24 @@
 Server ::Server(EventLoop *_loop)
 {
     this->MainReactor = _loop;
-    apt = new Acceptor(_loop);
+    apt = std::make_unique<Acceptor>(_loop);
     apt->setConnectionCallBack(std::bind(&Server::newConnection, this, std::placeholders::_1));
     int i = 0;
-    int size = std::thread::hardware_concurrency(); // 线程数量，也是subReactor数量
-    thread_pool = new Thread_pool<std::function<void()>>(size, 11451);
+    int size = static_cast<int>(std::thread::hardware_concurrency()); // 线程数量，也是subReactor数量
+    if (size <= 0)
+    {
+        size = 1;
+    }
+    thread_pool = std::make_unique<Thread_pool<std::function<void()>>>(size, 11451);
     while (i < size)
     {
-        subReactors.push_back(new EventLoop());
+        subReactors.push_back(std::make_unique<EventLoop>());
         i += 1;
     }
     i = 0;
     while (i < size)
     {
-        std::function<void()> cb = std::bind(&EventLoop::beginLoop, subReactors[i]);
+        std::function<void()> cb = std::bind(&EventLoop::beginLoop, subReactors[i].get());
         thread_pool->append(cb);
         i += 1;
     }
@@ -34,7 +38,7 @@ void Server::newConnection(mysocket *mysc)
 {
     int random = mysc->getFd() % subReactors.size();
     mysc->setBlock(false);
-    std::shared_ptr<Connection> connection = std::make_shared<Connection>(subReactors[random], mysc);
+    std::shared_ptr<Connection> connection = std::make_shared<Connection>(subReactors[random].get(), mysc);
     connection->state_ = Connection::State::Connected;
     connection->setDeleteConnectionCallBack(std::bind(&Server::deleteConnection, this, std::placeholders::_1));
     connection->setFunctionCallBack(Connect_Callback);

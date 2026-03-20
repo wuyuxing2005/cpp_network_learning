@@ -1,13 +1,12 @@
 #include "base/EventLoop.h"
+
 EventLoop::EventLoop()
 {
-    ep = new epoll();
-    // thread_pool = new Thread_pool<std::function<void()>>(10, 1000);
+    ep = std::make_unique<epoll>();
 }
 
 EventLoop::~EventLoop()
 {
-    delete ep;
 }
 
 void EventLoop::updateChannel(channel *ch)
@@ -31,7 +30,3 @@ void EventLoop::beginLoop()
         }
     }
 }
-// bool EventLoop::addInPoll(std::function<void()> CallBack)
-// {
-//     return thread_pool->append(std::move(CallBack));
-// }

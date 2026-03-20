@@ -4,13 +4,13 @@
 #include "Thread_Poll/ThreadPoll.h"
 #include <vector>
 #include <functional>
-
+#include <memory>
 class epoll;
 class channel;
 class EventLoop
 {
 private:
-    epoll *ep;
+    std::unique_ptr<epoll> ep;
     // Thread_pool<std::function<void()>> *thread_pool;
 
 public:

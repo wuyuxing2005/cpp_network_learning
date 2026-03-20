@@ -20,11 +20,11 @@ class Server
 {
 private:
     EventLoop *MainReactor;
-    Acceptor *apt;
+    std::unique_ptr<Acceptor> apt;
     std::unordered_map<int, std::shared_ptr<Connection>> connections;
-    std::vector<EventLoop *> subReactors;
+    std::vector<std::unique_ptr<EventLoop>> subReactors;
     std::mutex connections_mtx;
-    Thread_pool<std::function<void()>> *thread_pool;
+    std::unique_ptr<Thread_pool<std::function<void()>>> thread_pool;
     std::function<void(Connection *)> Connect_Callback;
 
 public:

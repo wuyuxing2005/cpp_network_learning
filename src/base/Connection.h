@@ -18,12 +18,11 @@ class Connection
 private:
     EventLoop *loop;
     mysocket *mysc;
-    channel *ch;
-
+    std::unique_ptr<channel> ch;
+    std::unique_ptr<Buffer> readBuffer;
+    std::unique_ptr<Buffer> sendBuffer;
     std::function<void(int)> deleteCallBack;
     std::function<void(Connection *)> functionCallBack;
-    Buffer *readBuffer;
-    Buffer *sendBuffer;
     std::mutex conn_mtx;
 
 public:

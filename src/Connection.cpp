@@ -3,21 +3,17 @@ Connection::Connection(EventLoop *_loop, mysocket *_mysc) // 负责连接socket�
 {
     this->loop = _loop;
     mysc = _mysc;
-    ch = new channel(loop, mysc->getFd(), true, true);
-    readBuffer = new Buffer();
-    sendBuffer = new Buffer();
+    ch = std::make_unique<channel>(loop, mysc->getFd(), true, true);
+    readBuffer = std::make_unique<Buffer>();
+    sendBuffer = std::make_unique<Buffer>();
 }
 
 Connection::~Connection()
 {
     if (ch != nullptr && ch->getInepoll())
     {
-        loop->deleteChannel(ch);
+        loop->deleteChannel(ch.get());
     }
-    delete ch;
-    delete mysc;
-    delete readBuffer;
-    delete sendBuffer;
 }
 
 void Connection::registerCallBack()
