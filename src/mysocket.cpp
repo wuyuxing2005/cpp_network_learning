@@ -8,6 +8,7 @@ mysocket::mysocket()
 }
 mysocket::mysocket(int _fd) : fd(_fd)
 {
+    isBlocked = true;
 }
 int mysocket::bind(sock_addr *sc_addr)
 {

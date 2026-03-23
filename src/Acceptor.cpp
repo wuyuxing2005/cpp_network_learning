@@ -20,10 +20,11 @@ void Acceptor::accpetNewConnection() // 启动accpetor
     setnonblocking(client_fd);
     std::cout << "Accept From " << "Port : " << sc_addr->getAddr().sin_port << " ip: " << network_to_shifen(sc_addr->getAddr().sin_addr.s_addr) << std::endl;
     std::unique_ptr<mysocket> client_socket = std::make_unique<mysocket>(client_fd);
-    CallBack(client_socket.get()); // 使用Server中的newconnection
+    client_socket->setBlock(false);
+    CallBack(std::move(client_socket)); // 使用Server中的newconnection
 }
 
-void Acceptor::setConnectionCallBack(std::function<void(mysocket *sc)> _CallBack) // 启动前需要初始化CallBack
+void Acceptor::setConnectionCallBack(std::function<void(std::unique_ptr<mysocket>)> _CallBack) // 启动前需要初始化CallBack
 {
     this->CallBack = _CallBack; // 将connextion的创建交给Server
     // 原因是因为Accpetor只负责监听与accpet，是负责一种机制，accpet之后获得的fd已经和监听fd（Accpetor）无关了，后续连接的操作应该由Server管理

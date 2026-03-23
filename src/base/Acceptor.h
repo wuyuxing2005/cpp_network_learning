@@ -18,11 +18,11 @@ private:
     std::unique_ptr<mysocket> socket;
     std::unique_ptr<sock_addr> sc_addr;
     std::unique_ptr<channel> ch;
-    std::function<void(mysocket *sc)> CallBack;
+    std::function<void(std::unique_ptr<mysocket>)> CallBack;
 
 public:
     Acceptor(EventLoop *_loop);
     ~Acceptor();
     void accpetNewConnection();
-    void setConnectionCallBack(std::function<void(mysocket *sc)> _CallBack);
+    void setConnectionCallBack(std::function<void(std::unique_ptr<mysocket>)> _CallBack);
 };

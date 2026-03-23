@@ -1,8 +1,8 @@
 #include "base/Connection.h"
-Connection::Connection(EventLoop *_loop, mysocket *_mysc) // 负责连接socket（channel）的处理
+Connection::Connection(EventLoop *_loop, std::unique_ptr<mysocket> _mysc) // 负责连接socket（channel）的处理
 {
     this->loop = _loop;
-    mysc = _mysc;
+    mysc = std::move(_mysc);
     ch = std::make_unique<channel>(loop, mysc->getFd(), true, true);
     readBuffer = std::make_unique<Buffer>();
     sendBuffer = std::make_unique<Buffer>();
@@ -170,5 +170,5 @@ void Connection::close0()
 }
 mysocket *Connection::getsocket()
 {
-    return mysc;
+    return mysc.get();
 }

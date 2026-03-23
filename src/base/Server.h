@@ -30,7 +30,7 @@ private:
 public:
     Server(EventLoop *_loop);
     void start();
-    void newConnection(mysocket *mysc);
+    void newConnection(std::unique_ptr<mysocket> mysc);
     void deleteConnection(int fd);
     void setConnect(std::function<void(Connection *)> _Connect_Callback);
     ~Server();

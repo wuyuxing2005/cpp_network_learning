@@ -17,7 +17,7 @@ class Connection
 
 private:
     EventLoop *loop;
-    mysocket *mysc;
+    std::unique_ptr<mysocket> mysc;
     std::unique_ptr<channel> ch;
     std::unique_ptr<Buffer> readBuffer;
     std::unique_ptr<Buffer> sendBuffer;
@@ -33,7 +33,7 @@ public:
         Closed,
         Failed,
     };
-    Connection(EventLoop *_loop, mysocket *_mysc);
+    Connection(EventLoop *_loop, std::unique_ptr<mysocket> _mysc);
     void registerCallBack();
     void setDeleteConnectionCallBack(std::function<void(int)> CallBack);
     // void echo();

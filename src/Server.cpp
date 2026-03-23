@@ -34,17 +34,16 @@ void Server::start() // 在创建实例后手动开启
     std::cout << "Server Start Now" << std::endl;
     MainReactor->beginLoop(); // 此处是开始寻找loop中的epoll中的已注册的发生事件的channel，并根据channel中的CallBack函数来进行具体的操作。也就是 **启动服务器的操作**
 }
-void Server::newConnection(mysocket *mysc)
+void Server::newConnection(std::unique_ptr<mysocket> mysc)
 {
     int random = mysc->getFd() % subReactors.size();
-    mysc->setBlock(false);
-    std::shared_ptr<Connection> connection = std::make_shared<Connection>(subReactors[random].get(), mysc);
+    std::shared_ptr<Connection> connection = std::make_shared<Connection>(subReactors[random].get(), std::move(mysc));
     connection->state_ = Connection::State::Connected;
     connection->setDeleteConnectionCallBack(std::bind(&Server::deleteConnection, this, std::placeholders::_1));
     connection->setFunctionCallBack(Connect_Callback);
     connection->registerCallBack();
     std::lock_guard<std::mutex> guard(connections_mtx);
-    connections[mysc->getFd()] = connection;
+    connections[connection->getsocket()->getFd()] = connection;
 }
 void Server::deleteConnection(int fd)
 {
