@@ -21,6 +21,14 @@ void Connection::registerCallBack()
     std::weak_ptr<Connection> weak_self = shared_from_this();
     ch->setCallBack([weak_self]() { // 看你的当前connection是否被delete，如果被delette就不调用echo了。
                                     // 原来的是std::bind(&Connection::echo, this)，但是如果this被delete会报错
+                                    /*
+                                    HandleEvent()
+                                      -> read_callback()
+                                         -> HandleClose()
+                                            -> erase connection
+                                            -> 对象可能析构
+                                      -> HandleEvent() 还没返回
+                                     */
         auto self = weak_self.lock();
         if (self)
         {

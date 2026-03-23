@@ -41,23 +41,21 @@ void Server::newConnection(std::unique_ptr<mysocket> mysc)
     connection->state_ = Connection::State::Connected;
     connection->setDeleteConnectionCallBack(std::bind(&Server::deleteConnection, this, std::placeholders::_1));
     connection->setFunctionCallBack(Connect_Callback);
-    connection->registerCallBack();
-    std::lock_guard<std::mutex> guard(connections_mtx);
+    connection->registerCallBack();                     // 设置channel回调函数并注册进epoll
+    std::lock_guard<std::mutex> guard(connections_mtx); // 可能会出现同时新连接产生，但同时用旧连接删除的情况。因为mainrector来产生新连接，但是其他线程会删除连接，会对connections同时修改,因此需要锁
     connections[connection->getsocket()->getFd()] = connection;
 }
 void Server::deleteConnection(int fd)
 {
     std::shared_ptr<Connection> con;
+    std::lock_guard<std::mutex> guard(connections_mtx);
+    auto it = connections.find(fd);
+    if (it == connections.end())
     {
-        std::lock_guard<std::mutex> guard(connections_mtx);
-        auto it = connections.find(fd);
-        if (it == connections.end())
-        {
-            return;
-        }
-        con = it->second;
-        connections.erase(it);
+        return;
     }
+    con = it->second;
+    connections.erase(it);
 }
 void Server::setConnect(std::function<void(Connection *)> _Connect_Callback)
 {
