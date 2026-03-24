@@ -25,8 +25,13 @@ CLIENT_SRC := \
 
 TEST_SRC := \
 	test.cpp \
+	src/Connection.cpp \
+	src/EventLoop.cpp \
+	src/channel.cpp \
+	src/epoll.cpp \
 	src/mysocket.cpp \
-	src/sock_addr.cpp
+	src/sock_addr.cpp \
+	src/Buffer.cpp
 
 .PHONY: all clean
 

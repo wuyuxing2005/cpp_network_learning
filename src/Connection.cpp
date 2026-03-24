@@ -61,34 +61,7 @@ std::string Connection::getReadBuffer()
 {
     return readBuffer->getString();
 }
-void Connection::BlockedRecv()
-{
-    char buffer[1024];
-    memset(buffer, '\0', 1024);
-    ssize_t s = recv(mysc->getFd(), buffer, 1024, 0);
-    if (s > 0)
-    {
-        readBuffer->append(buffer, s);
-    }
-    else if (s == 0)
-    {
-        state_ = State::Closed;
-    }
-    else
-    {
-        std::cout << "error " << strerror(errno) << std::endl;
-        state_ = State::Failed;
-    }
-}
-void Connection::BlockedSend()
-{
-    ssize_t s = send(mysc->getFd(), sendBuffer->getChar_c(), sendBuffer->getSize(), 0);
-    if (s == -1)
-    {
-        std::cout << "error " << strerror(errno) << std::endl;
-        state_ = State::Failed;
-    }
-}
+
 void Connection::noBlockedRecv()
 {
 
@@ -151,25 +124,12 @@ void Connection::noBlockedSend()
 void Connection::recv0()
 {
     readBuffer->clear_s(); // 清空readBuffer
-    if (mysc->getIsBlocked())
-    {
-        BlockedRecv();
-    }
-    else
-    {
-        noBlockedRecv();
-    }
+
+    noBlockedRecv();
 }
 void Connection::send0()
 {
-    if (mysc->getIsBlocked())
-    {
-        BlockedSend();
-    }
-    else
-    {
-        noBlockedSend();
-    }
+    noBlockedSend();
     sendBuffer->clear_s(); // 清空sendBuffer
 }
 void Connection::close0()

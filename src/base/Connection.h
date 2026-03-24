@@ -43,9 +43,7 @@ public:
     void recv0();
     void send0();
     void noBlockedRecv();
-    void BlockedRecv();
     void noBlockedSend();
-    void BlockedSend();
     void handleFunctionCallBack();
     void setFunctionCallBack(std::function<void(Connection *)> functionCallBack);
     void close0();

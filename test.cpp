@@ -1,11 +1,12 @@
-#include "src/base/mysocket.h"
-#include "src/base/sock_addr.h"
-#include "src/base/Connection.h"
+#include "base/Connection.h"
+#include "base/mysocket.h"
 #include <getopt.h>
+#include <sys/epoll.h>
 #include <sys/socket.h>
 #include <unistd.h>
 
 #include <cstring>
+#include <cerrno>
 #include <iostream>
 #include <string>
 #include <thread>
@@ -20,12 +21,18 @@ namespace
 
     void oneClient(int msgs, int wait_seconds)
     {
-        mysocket socket;
-        sock_addr addr(kHost, kPort);
+        std::unique_ptr<mysocket> socket = std::make_unique<mysocket>();
+        std::unique_ptr<sock_addr> addr = std::make_unique<sock_addr>(kHost, kPort);
 
-        if (socket.connect(&addr) == -1)
+        if (socket->connect(addr.get()) == -1)
         {
-            perror("socket connect error");
+            std::cout << "connect error: " << strerror(errno) << std::endl;
+            return;
+        }
+
+        if (socket->setnonblocking() == -1)
+        {
+            std::cout << "setnonblocking error: " << strerror(errno) << std::endl;
             return;
         }
 
@@ -35,43 +42,85 @@ namespace
         }
 
         const std::string message = kMessage;
-        std::string read_buffer;
-        read_buffer.reserve(message.size());
+        std::unique_ptr<Connection> conn = std::make_unique<Connection>(nullptr, std::move(socket));
+        conn->state_ = Connection::State::Connected;
+
+        int epfd = epoll_create1(0);
+        if (epfd == -1)
+        {
+            std::cout << "epoll_create1 error: " << strerror(errno) << std::endl;
+            return;
+        }
+
+        int sockfd = conn->getsocket()->getFd();
+        epoll_event ev{};
+        epoll_event evs[1]{};
+        ev.data.fd = sockfd;
+        ev.events = EPOLLIN | EPOLLET;
+        if (epoll_ctl(epfd, EPOLL_CTL_ADD, sockfd, &ev) == -1)
+        {
+            std::cout << "epoll_ctl error: " << strerror(errno) << std::endl;
+            close(epfd);
+            return;
+        }
 
         for (int count = 0; count < msgs; ++count)
         {
-            ssize_t write_bytes = send(socket.getFd(), message.data(), message.size(), 0);
-            if (write_bytes == -1)
+            conn->setSendBuffer(message);
+            conn->send0();
+            if (conn->state_ != Connection::State::Connected)
             {
-                perror("socket write error");
+                std::cout << "error connection" << std::endl;
                 break;
             }
 
-            read_buffer.clear();
-            while (static_cast<int>(read_buffer.size()) < static_cast<int>(message.size()))
+            while (true)
             {
-                char buf[1024];
-                ssize_t read_bytes = recv(socket.getFd(), buf, sizeof(buf), 0);
-                if (read_bytes > 0)
+                int ready = epoll_wait(epfd, evs, 1, -1);
+                if (ready == -1)
                 {
-                    read_buffer.append(buf, read_bytes);
+                    if (errno == EINTR)
+                    {
+                        continue;
+                    }
+                    std::cout << "epoll_wait error: " << strerror(errno) << std::endl;
+                    conn->state_ = Connection::State::Failed;
+                    break;
+                }
+                if (ready == 0)
+                {
                     continue;
                 }
-                if (read_bytes == 0)
+
+                conn->recv0();
+                if (conn->state_ == Connection::State::Closed)
                 {
                     std::cout << "server disconnected!" << std::endl;
+                    close(epfd);
                     return;
                 }
-                if (errno == EINTR)
+                if (conn->state_ == Connection::State::Failed)
                 {
-                    continue;
+                    std::cout << "socket read error" << std::endl;
+                    close(epfd);
+                    return;
                 }
-                perror("socket read error");
-                return;
+
+                if (static_cast<int>(conn->getReadBuffer().size()) >= static_cast<int>(message.size()))
+                {
+                    break;
+                }
             }
 
-            std::cout << "count: " << count << ", message from server: " << read_buffer << std::endl;
+            if (conn->state_ != Connection::State::Connected)
+            {
+                break;
+            }
+
+            std::cout << "count: " << count << ", message from server: " << conn->getReadBuffer() << std::endl;
         }
+
+        close(epfd);
     }
 
 } // namespace
