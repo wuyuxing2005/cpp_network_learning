@@ -1,3 +1,5 @@
+#pragma once
+
 #include <string>
 #include <iostream>
 class Buffer
@@ -15,4 +17,3 @@ public:
     void append(char *ch, ssize_t size);
     void clear_s();
 };
-

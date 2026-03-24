@@ -15,6 +15,10 @@ SERVER_SRC := \
 
 CLIENT_SRC := \
 	client.cpp \
+	src/Connection.cpp \
+	src/EventLoop.cpp \
+	src/channel.cpp \
+	src/epoll.cpp \
 	src/mysocket.cpp \
 	src/sock_addr.cpp \
 	src/Buffer.cpp
