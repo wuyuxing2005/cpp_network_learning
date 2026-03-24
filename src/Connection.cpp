@@ -63,9 +63,9 @@ std::string Connection::getReadBuffer()
 }
 void Connection::BlockedRecv()
 {
-    char buffer[MAX_BUFFER_SIZE];
-    memset(buffer, '\0', MAX_BUFFER_SIZE);
-    ssize_t s = recv(mysc->getFd(), buffer, MAX_BUFFER_SIZE, 0);
+    char buffer[1024];
+    memset(buffer, '\0', 1024);
+    ssize_t s = recv(mysc->getFd(), buffer, 1024, 0);
     if (s > 0)
     {
         readBuffer->append(buffer, s);

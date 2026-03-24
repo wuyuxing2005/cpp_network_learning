@@ -23,12 +23,6 @@ CLIENT_SRC := \
 	src/sock_addr.cpp \
 	src/Buffer.cpp
 
-CLIENT_UNBLOCK_SRC := \
-	client_unblock.cpp \
-	src/mysocket.cpp \
-	src/sock_addr.cpp \
-	src/Buffer.cpp
-
 TEST_SRC := \
 	test.cpp \
 	src/mysocket.cpp \
@@ -36,7 +30,7 @@ TEST_SRC := \
 
 .PHONY: all clean
 
-all: server client client_unblock test
+all: server client test
 
 server: $(SERVER_SRC)
 	$(CXX) $(CXXFLAGS) $(SERVER_SRC) -o $@
@@ -44,11 +38,8 @@ server: $(SERVER_SRC)
 client: $(CLIENT_SRC)
 	$(CXX) $(CXXFLAGS) $(CLIENT_SRC) -o $@
 
-client_unblock: $(CLIENT_UNBLOCK_SRC)
-	$(CXX) $(CXXFLAGS) $(CLIENT_UNBLOCK_SRC) -o $@
-
 test: $(TEST_SRC)
 	$(CXX) $(CXXFLAGS) $(TEST_SRC) -o $@
 
 clean:
-	rm -f server client client_unblock test
+	rm -f server client test

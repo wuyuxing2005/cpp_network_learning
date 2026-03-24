@@ -49,6 +49,7 @@ void mysocket::setBlock(bool _isblocked)
 }
 int mysocket::setnonblocking()
 {
+    this->isBlocked = false;
     int flags = fcntl(this->fd, F_GETFL);
     if (flags == -1)
     {
