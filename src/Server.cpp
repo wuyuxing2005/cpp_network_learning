@@ -34,28 +34,36 @@ void Server::start() // 在创建实例后手动开启
     std::cout << "Server Start Now" << std::endl;
     MainReactor->beginLoop(); // 此处是开始寻找loop中的epoll中的已注册的发生事件的channel，并根据channel中的CallBack函数来进行具体的操作。也就是 **启动服务器的操作**
 }
-void Server::newConnection(std::unique_ptr<mysocket> mysc)
+void Server::newConnection(std::unique_ptr<mysocket> mysc) // acceptor中的回调函数
 {
     int random = mysc->getFd() % subReactors.size();
     std::shared_ptr<Connection> connection = std::make_shared<Connection>(subReactors[random].get(), std::move(mysc));
+
     connection->state_ = Connection::State::Connected;
     connection->setDeleteConnectionCallBack(std::bind(&Server::deleteConnection, this, std::placeholders::_1));
     connection->setFunctionCallBack(Connect_Callback);
-    connection->registerCallBack();                     // 设置channel回调函数并注册进epoll
-    std::lock_guard<std::mutex> guard(connections_mtx); // 可能会出现同时新连接产生，但同时用旧连接删除的情况。因为mainrector来产生新连接，但是其他线程会删除连接，会对connections同时修改,因此需要锁
-    connections[connection->getsocket()->getFd()] = connection;
+    {
+        std::lock_guard<std::mutex> guard(connections_mtx); // main reactor 创建连接，sub reactor 可能删除连接，这里只保护 map 修改
+        connections[connection->getsocket()->getFd()] = connection;
+    }
+    connection->registerCallBack(); // 设置channel回调函数并注册进epoll
 }
 void Server::deleteConnection(int fd)
 {
     std::shared_ptr<Connection> con;
-    std::lock_guard<std::mutex> guard(connections_mtx);
-    auto it = connections.find(fd);
-    if (it == connections.end())
     {
-        return;
+        std::lock_guard<std::mutex> guard(connections_mtx);
+        auto it = connections.find(fd);
+        if (it == connections.end())
+        {
+            return;
+        }
+        con = it->second;
+        connections.erase(it);
     }
-    con = it->second;
-    connections.erase(it);
+    EventLoop *loop_ = con->getLoop();
+    loop_->PushFuncInToDoList(std::bind(&Connection::connectionDestructor, con)); // 因为是拷贝操作，con就是一份额外的connection 的shared_ptr的计数。
+    //在该函数未返回之前实际上con的shared_ptr引用数为3，因为此时还存在一个临时变量con。当该函数返回时就只剩俩了
 }
 void Server::setConnect(std::function<void(Connection *)> _Connect_Callback)
 {

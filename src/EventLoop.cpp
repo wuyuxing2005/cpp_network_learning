@@ -28,5 +28,23 @@ void EventLoop::beginLoop()
         {
             ch->handleEventByCallBack();
         }
+        DoToDolist();
     }
+}
+void EventLoop::DoToDolist() // 目前是用来在handleEVent之后来进行回收处理
+{
+    std::vector<std::function<void()>> functions;
+    {
+        std::lock_guard<std::mutex> guard(mutex_);
+        functions.swap(to_do_list_); // 直接清空to_do_list里面的数据并提取出来到functions中
+    }
+    for (auto &func : functions)
+    {
+        func(); // 调用ConnectionDestructor
+    }
+}
+void EventLoop::PushFuncInToDoList(std::function<void()> cb)
+{
+    std::lock_guard<std::mutex> guard(mutex_);
+    to_do_list_.emplace_back(std::move(cb));
 }

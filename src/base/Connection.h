@@ -45,8 +45,10 @@ public:
     void noBlockedRecv();
     void noBlockedSend();
     void handleFunctionCallBack();
+    EventLoop *getLoop();
     void setFunctionCallBack(std::function<void(Connection *)> functionCallBack);
     void close0();
+    void connectionDestructor();
     mysocket *getsocket();
     ~Connection();
 };

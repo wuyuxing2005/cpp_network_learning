@@ -5,6 +5,7 @@
 
 channel::channel(EventLoop *_loop, int _fd, bool _useThreadPoll, bool _useET) : loop(_loop), fd(_fd), inepoll(false), events(0), revents(0), useThreadPoll(_useThreadPoll), useET(_useET)
 {
+    tied_ = false;
 }
 
 int channel::getFd()
@@ -57,12 +58,29 @@ uint32_t channel::getRevents()
 channel::~channel()
 {
 }
+
 void channel::handleEventByCallBack()
 {
-    // std::function<void()> callback = CallBack; // 先拷贝回调，避免后续对象销毁导致悬空引用。
-    CallBack(); // 此处不需要再进行addthreadpoll，因为此时loop中不再存在线程池，loop直接监听即可
-}
+    if (tied_) // 如果绑定了所对应的Connection，或者说需要注意其对应的Connection是否会提前delete
+    {
+        std::shared_ptr<void> guard = tie_.lock();
+        if (guard) // 只有在handleevent之后Connection才会释放
+        {
+            CallBack();
+        }
+    }
+    else
+    {
+        CallBack();
+    }
+} // 函数结束，guard指针被析构，相对应的connection被析构
 void channel::setCallBack(std::function<void()> callback)
 {
     this->CallBack = callback;
+}
+
+void channel::Tie(const std::shared_ptr<void> &owner)
+{
+    tie_ = owner;
+    tied_ = true;
 }

@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include <functional>
+#include <memory>
 
 class EventLoop;
 
@@ -17,6 +18,8 @@ private:
     uint32_t revents;
     bool useThreadPoll;
     bool useET;
+    bool tied_;
+    std::weak_ptr<void> tie_;
 
 public:
     channel(EventLoop *_loop, int _fd, bool _useThreadPoll, bool _useET);
@@ -30,6 +33,7 @@ public:
     void setRevents(uint32_t _revents);
     void setCallBack(std::function<void()> CallBack);
     void handleEventByCallBack();
+    void Tie(const std::shared_ptr<void> &owner);
     uint32_t getRevents();
     ~channel();
 };

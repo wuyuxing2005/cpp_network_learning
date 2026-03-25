@@ -10,31 +10,18 @@ Connection::Connection(EventLoop *_loop, std::unique_ptr<mysocket> _mysc) // 负
 
 Connection::~Connection()
 {
+}
+void Connection::connectionDestructor()
+{
     if (ch != nullptr && ch->getInepoll())
     {
-        loop->deleteChannel(ch.get());
+        loop->deleteChannel(ch.get()); // 这里使用我们人为的delete函数是为了删除ch在epoll中的注册,具体的内存上的析构处理仍然在Connection中
     }
 }
-
 void Connection::registerCallBack()
 {
-    std::weak_ptr<Connection> weak_self = shared_from_this();
-    ch->setCallBack([weak_self]() { // 看你的当前connection是否被delete，如果被delette就不调用echo了。
-                                    // 原来的是std::bind(&Connection::echo, this)，但是如果this被delete会报错
-                                    /*
-                                    HandleEvent()
-                                      -> read_callback()
-                                         -> HandleClose()
-                                            -> erase connection
-                                            -> 对象可能析构
-                                      -> HandleEvent() 还没返回
-                                     */
-        auto self = weak_self.lock();
-        if (self)
-        {
-            self->handleFunctionCallBack();
-        }
-    });
+    ch->Tie(shared_from_this());
+    ch->setCallBack(std::bind(&Connection::handleFunctionCallBack, this));
     ch->enAbleToReading();
 }
 void Connection::handleFunctionCallBack()
@@ -45,7 +32,10 @@ void Connection::setFunctionCallBack(std::function<void(Connection *)> _function
 {
     functionCallBack = _functionCallBack; // server.cpp中设置的函数。注意是小写s的server.cpp
 }
-
+EventLoop *Connection::getLoop()
+{
+    return this->loop;
+}
 void Connection::setDeleteConnectionCallBack(std::function<void(int)> CallBack)
 {
     this->deleteCallBack = CallBack;
@@ -132,7 +122,7 @@ void Connection::send0()
     noBlockedSend();
     sendBuffer->clear_s(); // 清空sendBuffer
 }
-void Connection::close0()
+void Connection::close0() // 关闭Connection对应的socket，只是逻辑关闭，但是Connection实例的析构还需要析构函数
 {
     deleteCallBack(mysc->getFd());
 }
