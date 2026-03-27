@@ -21,7 +21,7 @@ void Connection::connectionDestructor()
 void Connection::registerCallBack()
 {
     ch->Tie(shared_from_this());
-    ch->setCallBack(std::bind(&Connection::handleFunctionCallBack, this));
+    ch->setReadCallBack(std::bind(&Connection::handleFunctionCallBack, this));
     ch->enAbleToReading();
 }
 void Connection::handleFunctionCallBack()

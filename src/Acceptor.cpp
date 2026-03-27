@@ -9,7 +9,7 @@ Acceptor::Acceptor(EventLoop *_loop) // 该类主要是抽象监听socket
     socket->bind(sc_addr.get());
     socket->listen();
     ch = std::make_unique<channel>(_loop, socket->getFd(), false, false);
-    ch->setCallBack(std::bind(&Acceptor::accpetNewConnection, this));
+    ch->setReadCallBack(std::bind(&Acceptor::accpetNewConnection, this));
     ch->enAbleToReading(); // 注册进loop（epoll）
 }
 

@@ -46,7 +46,13 @@ void channel::enAbleToReading() // 把自己注册到epoll中
     }
     loop->updateChannel(this);
 }
-
+void channel::enAbleToWriting()
+{
+    events |= EPOLLOUT;
+    if (useET)
+        events |= EPOLLET;
+    loop->updateChannel(this);
+}
 void channel::setRevents(uint32_t _revents)
 {
     revents = _revents;
@@ -64,21 +70,31 @@ void channel::handleEventByCallBack()
     if (tied_) // 如果绑定了所对应的Connection，或者说需要注意其对应的Connection是否会提前delete
     {
         std::shared_ptr<void> guard = tie_.lock();
-        if (guard) // 只有在handleevent之后Connection才会释放
+        if (!guard) // 只有在handleevent之后Connection才会释放
         {
-            CallBack();
+            return;
         }
     }
-    else
+    if (revents & (EPOLLIN | EPOLLPRI | EPOLLRDHUP))
     {
-        CallBack();
+        if (recv_callback)
+            recv_callback();
     }
-} // 函数结束，guard指针被析构，相对应的connection被析构
-void channel::setCallBack(std::function<void()> callback)
-{
-    this->CallBack = callback;
-}
+    if (revents & EPOLLOUT)
+    {
+        if (send_callback)
+            send_callback();
+    }
 
+} // 函数结束，guard指针被析构，相对应的connection被析构
+void channel::setReadCallBack(std::function<void()> _recv_callback)
+{
+    this->recv_callback = _recv_callback;
+}
+void channel::setWriteCallBack(std::function<void()> _send_callback)
+{
+    send_callback = _send_callback;
+}
 void channel::Tie(const std::shared_ptr<void> &owner)
 {
     tie_ = owner;
