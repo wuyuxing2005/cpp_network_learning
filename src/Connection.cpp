@@ -6,6 +6,7 @@ Connection::Connection(EventLoop *_loop, std::unique_ptr<mysocket> _mysc) // 负
     ch = std::make_unique<channel>(loop, mysc->getFd(), true, true);
     readBuffer = std::make_unique<Buffer>();
     sendBuffer = std::make_unique<Buffer>();
+    http_context = std::make_unique<HttpContext>();
 }
 
 Connection::~Connection()
@@ -84,10 +85,13 @@ void Connection::noBlockedRecv()
 }
 void Connection::noBlockedSend()
 {
-    char buffer[sendBuffer->getSize()];
-    memccpy(buffer, sendBuffer->getChar_c(), sendBuffer->getSize(), sendBuffer->getSize());
-    int bytes_send = 0;
     int size = sendBuffer->getSize();
+    if (size <= 0)
+    {
+        return;
+    }
+    const char *buffer = sendBuffer->getChar_c();
+    int bytes_send = 0;
     while (bytes_send < size)
     {
         ssize_t s = send(mysc->getFd(), buffer + bytes_send, size - bytes_send, 0);
@@ -129,4 +133,8 @@ void Connection::close0() // 关闭Connection对应的socket，只是逻辑关�
 mysocket *Connection::getsocket()
 {
     return mysc.get();
+}
+HttpContext *Connection::context()
+{
+    return http_context.get();
 }

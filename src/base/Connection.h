@@ -7,6 +7,7 @@
 #include <memory>
 #include <mutex>
 #include "Buffer.h"
+#include "http/HttpContext.h"
 #define MAX_BUFFER_SIZE 10
 class channel;
 class EventLoop;
@@ -24,6 +25,7 @@ private:
     std::function<void(int)> deleteCallBack;
     std::function<void(Connection *)> functionCallBack;
     std::mutex conn_mtx;
+    std::unique_ptr<HttpContext> http_context;
 
 public:
     enum State
@@ -50,5 +52,6 @@ public:
     void close0();
     void connectionDestructor();
     mysocket *getsocket();
+    HttpContext *context();
     ~Connection();
 };

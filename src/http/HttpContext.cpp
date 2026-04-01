@@ -21,6 +21,7 @@ bool HttpContext::GetCompleteRequest()
 void HttpContext::ResetContextStatus()
 {
     state_ = HttpRequestParaseState::START;
+    request_ = std::make_unique<HttpRequest>();
 }
 
 bool HttpContext::ParaseRequest(const char *begin, int size)
@@ -273,7 +274,7 @@ bool HttpContext::ParaseRequest(const char *begin, int size)
             if (ch == CR)
             {
                 // 说明遇到了空行，大概率时结束了
-                state_ = HttpRequestParaseState::CR_LF_CR;//如果还是\r，说明连续遇到了两次\r \n,因此可以说header结束，即将来到空行，之后就是body
+                state_ = HttpRequestParaseState::CR_LF_CR; // 如果还是\r，说明连续遇到了两次\r \n,因此可以说header结束，即将来到空行，之后就是body
                 // start  = end + 1;
                 // std::cout << "a:" << (*start == '\n') << std::endl;
                 // std::cout << "b:" << (*end == '\r') << std::endl;
@@ -282,7 +283,7 @@ bool HttpContext::ParaseRequest(const char *begin, int size)
             {
                 state_ = HttpRequestParaseState::kINVALID;
             }
-            else//如果是字符
+            else // 如果是字符
             {
                 state_ = HttpRequestParaseState::HEADER_KEY;
             }
@@ -297,9 +298,9 @@ bool HttpContext::ParaseRequest(const char *begin, int size)
             if (ch == LF)
             {
                 // 这就意味着遇到了空行，要进行解析请求体了
-                if (request_->headers().count("Content-Lenght"))
+                if (request_->headers().count("Content-Length"))
                 {
-                    if (atoi(request_->GetHeader("Content-Lenght").c_str()) > 0)
+                    if (atoi(request_->GetHeader("Content-Length").c_str()) > 0)
                     {
                         state_ = HttpRequestParaseState::BODY;
                     }

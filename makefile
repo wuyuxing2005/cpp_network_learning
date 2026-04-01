@@ -1,8 +1,11 @@
 CXX := g++
 CXXFLAGS := -std=c++17 -pthread -I. -Isrc
 
-SERVER_SRC := \
-	server.cpp \
+HTTP_CORE_SRC := \
+	src/http/HttpContext.cpp \
+	src/http/HttpRequest.cpp
+
+COMMON_SRC := \
 	src/Server.cpp \
 	src/epoll.cpp \
 	src/channel.cpp \
@@ -13,32 +16,29 @@ SERVER_SRC := \
 	src/Connection.cpp \
 	src/Buffer.cpp
 
+HTTP_SERVER_SRC := \
+	HttpServer.cpp \
+	src/http/HttpServer.cpp \
+	src/http/HttpResponse.cpp \
+	$(COMMON_SRC) \
+	$(HTTP_CORE_SRC)
+
 CLIENT_SRC := \
 	client.cpp \
-	src/Connection.cpp \
-	src/EventLoop.cpp \
-	src/channel.cpp \
-	src/epoll.cpp \
-	src/mysocket.cpp \
-	src/sock_addr.cpp \
-	src/Buffer.cpp
+	$(COMMON_SRC) \
+	$(HTTP_CORE_SRC)
 
 TEST_SRC := \
 	test.cpp \
-	src/Connection.cpp \
-	src/EventLoop.cpp \
-	src/channel.cpp \
-	src/epoll.cpp \
-	src/mysocket.cpp \
-	src/sock_addr.cpp \
-	src/Buffer.cpp
+	$(COMMON_SRC) \
+	$(HTTP_CORE_SRC)
 
 .PHONY: all clean
 
 all: server client test
 
-server: $(SERVER_SRC)
-	$(CXX) $(CXXFLAGS) $(SERVER_SRC) -o $@
+server: $(HTTP_SERVER_SRC)
+	$(CXX) $(CXXFLAGS) $(HTTP_SERVER_SRC) -o $@
 
 client: $(CLIENT_SRC)
 	$(CXX) $(CXXFLAGS) $(CLIENT_SRC) -o $@
