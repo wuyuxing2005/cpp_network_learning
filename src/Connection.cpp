@@ -1,4 +1,38 @@
 #include "base/Connection.h"
+
+namespace
+{
+std::string PreviewBuffer(const std::string &buffer, std::size_t max_len = 80)
+{
+    std::string preview;
+    preview.reserve(std::min(buffer.size(), max_len));
+    for (char ch : buffer)
+    {
+        if (preview.size() >= max_len)
+        {
+            break;
+        }
+        if (ch == '\r')
+        {
+            preview += "\\r";
+        }
+        else if (ch == '\n')
+        {
+            preview += "\\n";
+        }
+        else
+        {
+            preview += ch;
+        }
+    }
+    if (buffer.size() > max_len)
+    {
+        preview += "...";
+    }
+    return preview;
+}
+}
+
 Connection::Connection(EventLoop *_loop, std::unique_ptr<mysocket> _mysc) // 负责连接socket（channel）的处理
 {
     this->loop = _loop;
@@ -68,6 +102,11 @@ void Connection::noBlockedRecv()
         }
         else if (bytes_read == 0)
         {
+            const std::string current_buffer = readBuffer->getString();
+            std::cout << "[conn-peer-close] fd=" << mysc->getFd()
+                      << " buffered_bytes=" << current_buffer.size()
+                      << " preview=\"" << PreviewBuffer(current_buffer) << "\""
+                      << std::endl;
             state_ = State::Closed;
             break;
         }

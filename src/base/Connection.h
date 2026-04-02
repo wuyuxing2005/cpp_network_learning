@@ -8,7 +8,7 @@
 #include <mutex>
 #include "Buffer.h"
 #include "http/HttpContext.h"
-#define MAX_BUFFER_SIZE 10
+#define MAX_BUFFER_SIZE 100
 class channel;
 class EventLoop;
 class mysocket;
