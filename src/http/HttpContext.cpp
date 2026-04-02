@@ -1,3 +1,5 @@
+
+
 #include "HttpContext.h"
 #include "HttpRequest.h"
 #include <memory>
@@ -111,11 +113,11 @@ bool HttpContext::ParaseRequest(const char *begin, int size)
         }
         case HttpRequestParaseState::BEFORE_URL_PARAM_KEY:
         {
-            // std::cout << ch << std::endl;
+            // std::cout << ch << '\n';
             if (isblank(ch) || ch == CR || ch == LF)
             {
                 // 当开始进入url params时，遇到了空格，换行等，则不合法
-                // std::cout << ch << std::endl;
+                // std::cout << ch << '\n';
                 state_ = HttpRequestParaseState::kINVALID;
             }
             else
@@ -173,7 +175,7 @@ bool HttpContext::ParaseRequest(const char *begin, int size)
         }
         case HttpRequestParaseState::BEFORE_PROTOCOL:
         {
-            // std::cout << std::string(start, end) << std::endl;
+            // std::cout << std::string(start, end) << '\n';
             if (isblank(ch))
             {
                 // nothing
@@ -270,14 +272,14 @@ bool HttpContext::ParaseRequest(const char *begin, int size)
         }
         case HttpRequestParaseState::CR_LF:
         {
-            // std::cout << "111" << ch << std::endl;
+            // std::cout << "111" << ch << '\n';
             if (ch == CR)
             {
                 // 说明遇到了空行，大概率时结束了
                 state_ = HttpRequestParaseState::CR_LF_CR; // 如果还是\r，说明连续遇到了两次\r \n,因此可以说header结束，即将来到空行，之后就是body
                 // start  = end + 1;
-                // std::cout << "a:" << (*start == '\n') << std::endl;
-                // std::cout << "b:" << (*end == '\r') << std::endl;
+                // std::cout << "a:" << (*start == '\n') << '\n';
+                // std::cout << "b:" << (*end == '\r') << '\n';
             }
             else if (isblank(ch))
             {
@@ -293,8 +295,8 @@ bool HttpContext::ParaseRequest(const char *begin, int size)
         {
             // 判断是否需要解析请求体
             //
-            // std::cout << "c:" << (ch == '\n') << std::endl;
-            // std::cout << "size:" << end-begin << std::endl;
+            // std::cout << "c:" << (ch == '\n') << '\n';
+            // std::cout << "size:" << end-begin << '\n';
             if (ch == LF)
             {
                 // 这就意味着遇到了空行，要进行解析请求体了
@@ -333,7 +335,7 @@ bool HttpContext::ParaseRequest(const char *begin, int size)
         {
 
             int bodylength = size - (end - begin);
-            // std::cout << "bodylength:" << bodylength << std::endl;
+            // std::cout << "bodylength:" << bodylength << '\n';
             request_->SetBody(std::string(start, start + bodylength));
             state_ = HttpRequestParaseState::COMPLETE;
             break;

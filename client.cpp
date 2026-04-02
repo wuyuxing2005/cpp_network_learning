@@ -6,7 +6,7 @@
 #include "base/Buffer.h"
 #include <sys/epoll.h>
 #include <unistd.h>
-#define MAX_BUFFER_SIZE 10
+#define MAX_BUFFER_SIZE 1000
 // 为IO非阻塞版本
 int main()
 {

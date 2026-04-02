@@ -1,4 +1,5 @@
 #include "base/Acceptor.h"
+#include "base/DebugLog.h"
 #include "base/set_noblocking.h"
 #include <iostream>
 Acceptor::Acceptor(EventLoop *_loop) // 该类主要是抽象监听socket
@@ -18,7 +19,10 @@ void Acceptor::accpetNewConnection() // 启动accpetor
     std::unique_ptr<sock_addr> sc_addr = std::make_unique<sock_addr>();
     int client_fd = socket->accept(sc_addr.get());
     setnonblocking(client_fd);
-    std::cout << "Accept From " << "Port : " << sc_addr->getAddr().sin_port << " ip: " << network_to_shifen(sc_addr->getAddr().sin_addr.s_addr) << std::endl;
+    CPP_NETWORK_LOG << "Accept From "
+                    << "Port : " << sc_addr->getAddr().sin_port
+                    << " ip: " << network_to_shifen(sc_addr->getAddr().sin_addr.s_addr)
+                    << '\n';
     std::unique_ptr<mysocket> client_socket = std::make_unique<mysocket>(client_fd);
     client_socket->setBlock(false);
     CallBack(std::move(client_socket)); // 使用Server中的newconnection

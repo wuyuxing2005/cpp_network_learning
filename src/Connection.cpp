@@ -1,36 +1,37 @@
 #include "base/Connection.h"
+#include "base/DebugLog.h"
 
 namespace
 {
-std::string PreviewBuffer(const std::string &buffer, std::size_t max_len = 80)
-{
-    std::string preview;
-    preview.reserve(std::min(buffer.size(), max_len));
-    for (char ch : buffer)
+    std::string PreviewBuffer(const std::string &buffer, std::size_t max_len = 80)
     {
-        if (preview.size() >= max_len)
+        std::string preview;
+        preview.reserve(std::min(buffer.size(), max_len));
+        for (char ch : buffer)
         {
-            break;
+            if (preview.size() >= max_len)
+            {
+                break;
+            }
+            if (ch == '\r')
+            {
+                preview += "\\r";
+            }
+            else if (ch == '\n')
+            {
+                preview += "\\n";
+            }
+            else
+            {
+                preview += ch;
+            }
         }
-        if (ch == '\r')
+        if (buffer.size() > max_len)
         {
-            preview += "\\r";
+            preview += "...";
         }
-        else if (ch == '\n')
-        {
-            preview += "\\n";
-        }
-        else
-        {
-            preview += ch;
-        }
+        return preview;
     }
-    if (buffer.size() > max_len)
-    {
-        preview += "...";
-    }
-    return preview;
-}
 }
 
 Connection::Connection(EventLoop *_loop, std::unique_ptr<mysocket> _mysc) // 负责连接socket（channel）的处理
@@ -57,11 +58,16 @@ void Connection::registerCallBack()
 {
     ch->Tie(shared_from_this());
     ch->setReadCallBack(std::bind(&Connection::handleFunctionCallBack, this));
+    ch->setWriteCallBack(std::bind(&Connection::handleWriteCallBack, this));
     ch->enAbleToReading();
 }
 void Connection::handleFunctionCallBack()
 {
     functionCallBack(this);
+}
+void Connection::handleWriteCallBack()
+{
+    send0();
 }
 void Connection::setFunctionCallBack(std::function<void(Connection *)> _functionCallBack)
 {
@@ -80,6 +86,7 @@ void Connection::setSendBuffer(std::string s)
 {
     sendBuffer->clear_s(); // 清空sendBuffer
     sendBuffer->append((char *)s.c_str(), s.size());
+    send_offset_ = 0;
 }
 
 std::string Connection::getReadBuffer()
@@ -103,10 +110,10 @@ void Connection::noBlockedRecv()
         else if (bytes_read == 0)
         {
             const std::string current_buffer = readBuffer->getString();
-            std::cout << "[conn-peer-close] fd=" << mysc->getFd()
-                      << " buffered_bytes=" << current_buffer.size()
-                      << " preview=\"" << PreviewBuffer(current_buffer) << "\""
-                      << std::endl;
+            CPP_NETWORK_LOG << "[conn-peer-close] fd=" << mysc->getFd()
+                            << " buffered_bytes=" << current_buffer.size()
+                            << " preview=\"" << PreviewBuffer(current_buffer) << "\""
+                            << '\n';
             state_ = State::Closed;
             break;
         }
@@ -116,32 +123,34 @@ void Connection::noBlockedRecv()
         }
         else
         {
-            std::cout << "error " << strerror(errno) << std::endl;
+            CPP_NETWORK_LOG << "error " << strerror(errno) << '\n';
             state_ = State::Failed;
             break;
         }
     }
 }
-void Connection::noBlockedSend()
+bool Connection::noBlockedSend()
 {
     int size = sendBuffer->getSize();
     if (size <= 0)
     {
-        return;
+        return true;
     }
     const char *buffer = sendBuffer->getChar_c();
-    int bytes_send = 0;
-    while (bytes_send < size)
+    while (send_offset_ < static_cast<std::size_t>(size))
     {
-        ssize_t s = send(mysc->getFd(), buffer + bytes_send, size - bytes_send, 0);
+        ssize_t s = send(mysc->getFd(),
+                         buffer + send_offset_,
+                         size - static_cast<int>(send_offset_),
+                         0);
         if (s > 0)
         {
-            bytes_send += s;
+            send_offset_ += static_cast<std::size_t>(s);
             continue;
         }
-        else if (s == -1 && (errno == EWOULDBLOCK || errno == EAGAIN)) // 发完了
+        else if (s == -1 && (errno == EWOULDBLOCK || errno == EAGAIN))
         {
-            break;
+            return false;
         }
         else if (s == -1 && errno == EINTR) // 发送中断
         {
@@ -149,10 +158,12 @@ void Connection::noBlockedSend()
         }
         else
         {
-            std::cout << "error" << strerror(errno) << std::endl;
-            break;
+            CPP_NETWORK_LOG << "error " << strerror(errno) << '\n';
+            state_ = State::Failed;
+            return false;
         }
     }
+    return true;
 }
 void Connection::recv0()
 {
@@ -162,8 +173,30 @@ void Connection::recv0()
 }
 void Connection::send0()
 {
-    noBlockedSend();
-    sendBuffer->clear_s(); // 清空sendBuffer
+    bool is_finished = noBlockedSend();
+    if (state_ != State::Connected)
+    {
+        close0();
+        return;
+    }
+    if (!is_finished)
+    {
+        ch->enAbleToWriting();
+        return;
+    }
+
+    sendBuffer->clear_s();
+    send_offset_ = 0;
+    ch->enAbleToReading();
+    if (close_after_write_)
+    {
+        close_after_write_ = false;
+        close0();
+    }
+}
+void Connection::setCloseAfterWrite(bool close_after_write)
+{
+    close_after_write_ = close_after_write;
 }
 void Connection::close0() // 关闭Connection对应的socket，只是逻辑关闭，但是Connection实例的析构还需要析构函数
 {

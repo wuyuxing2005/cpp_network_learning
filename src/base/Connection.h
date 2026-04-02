@@ -8,7 +8,7 @@
 #include <mutex>
 #include "Buffer.h"
 #include "http/HttpContext.h"
-#define MAX_BUFFER_SIZE 100
+#define MAX_BUFFER_SIZE 1000
 class channel;
 class EventLoop;
 class mysocket;
@@ -22,6 +22,8 @@ private:
     std::unique_ptr<channel> ch;
     std::unique_ptr<Buffer> readBuffer;
     std::unique_ptr<Buffer> sendBuffer;
+    std::size_t send_offset_{0};
+    bool close_after_write_{false};
     std::function<void(int)> deleteCallBack;
     std::function<void(Connection *)> functionCallBack;
     std::mutex conn_mtx;
@@ -45,10 +47,12 @@ public:
     void recv0();
     void send0();
     void noBlockedRecv();
-    void noBlockedSend();
+    bool noBlockedSend();
     void handleFunctionCallBack();
+    void handleWriteCallBack();
     EventLoop *getLoop();
     void setFunctionCallBack(std::function<void(Connection *)> functionCallBack);
+    void setCloseAfterWrite(bool close_after_write);
     void close0();
     void connectionDestructor();
     mysocket *getsocket();

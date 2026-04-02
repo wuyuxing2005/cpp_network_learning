@@ -26,13 +26,13 @@ namespace
 
         if (socket->connect(addr.get()) == -1)
         {
-            std::cout << "connect error: " << strerror(errno) << std::endl;
+            std::cout << "connect error: " << strerror(errno) << '\n';
             return;
         }
 
         if (socket->setnonblocking() == -1)
         {
-            std::cout << "setnonblocking error: " << strerror(errno) << std::endl;
+            std::cout << "setnonblocking error: " << strerror(errno) << '\n';
             return;
         }
 
@@ -48,7 +48,7 @@ namespace
         int epfd = epoll_create1(0);
         if (epfd == -1)
         {
-            std::cout << "epoll_create1 error: " << strerror(errno) << std::endl;
+            std::cout << "epoll_create1 error: " << strerror(errno) << '\n';
             return;
         }
 
@@ -59,7 +59,7 @@ namespace
         ev.events = EPOLLIN | EPOLLET;
         if (epoll_ctl(epfd, EPOLL_CTL_ADD, sockfd, &ev) == -1)
         {
-            std::cout << "epoll_ctl error: " << strerror(errno) << std::endl;
+            std::cout << "epoll_ctl error: " << strerror(errno) << '\n';
             close(epfd);
             return;
         }
@@ -70,7 +70,7 @@ namespace
             conn->send0();
             if (conn->state_ != Connection::State::Connected)
             {
-                std::cout << "error connection" << std::endl;
+                std::cout << "error connection" << '\n';
                 break;
             }
 
@@ -83,7 +83,7 @@ namespace
                     {
                         continue;
                     }
-                    std::cout << "epoll_wait error: " << strerror(errno) << std::endl;
+                    std::cout << "epoll_wait error: " << strerror(errno) << '\n';
                     conn->state_ = Connection::State::Failed;
                     break;
                 }
@@ -95,13 +95,13 @@ namespace
                 conn->recv0();
                 if (conn->state_ == Connection::State::Closed)
                 {
-                    std::cout << "server disconnected!" << std::endl;
+                    std::cout << "server disconnected!" << '\n';
                     close(epfd);
                     return;
                 }
                 if (conn->state_ == Connection::State::Failed)
                 {
-                    std::cout << "socket read error" << std::endl;
+                    std::cout << "socket read error" << '\n';
                     close(epfd);
                     return;
                 }
@@ -117,7 +117,7 @@ namespace
                 break;
             }
 
-            std::cout << "count: " << count << ", message from server: " << conn->getReadBuffer() << std::endl;
+            std::cout << "count: " << count << ", message from server: " << conn->getReadBuffer() << '\n';
         }
 
         close(epfd);
@@ -146,7 +146,7 @@ int main(int argc, char *argv[])
             wait = std::stoi(optarg);
             break;
         default:
-            std::cerr << "usage: ./test [-t threads] [-m messages] [-w wait_seconds]" << std::endl;
+            std::cerr << "usage: ./test [-t threads] [-m messages] [-w wait_seconds]" << '\n';
             return 1;
         }
     }
