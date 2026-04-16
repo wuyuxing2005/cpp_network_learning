@@ -79,9 +79,9 @@ void TimeQueue::ResetTimers()
             delete p.second;
         }
     }
-    if (!timers_.empty())
+    if (!timers.empty())
     {
-        ResetTimerFd(timers_.begin()->second);
+        ResetTimerFd(timers.begin()->second);
     }
 }
 bool TimeQueue::Insert(Timer *timer)

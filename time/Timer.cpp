@@ -15,7 +15,7 @@ bool Timer::IsRepeat()
 }
 void Timer::restart(TimeStamp Now)
 {
-    expiration = TimeStamp(Now.microseconds() + interval);
+    expiration = TimeStamp::AddTime(Now, interval);
 }
 Timer::~Timer()
 {

@@ -40,7 +40,7 @@ TimeStamp TimeStamp::getNowTime()
 }
 TimeStamp TimeStamp::AddTime(TimeStamp timestamp, double add_seconds)
 {
-    int64_t add_microseconds = static_cast<int64_t>(add_seconds) * kMicrosecond2Second;
+    int64_t add_microseconds = static_cast<int64_t>(add_seconds * kMicrosecond2Second);
     return TimeStamp(timestamp.microseconds() + add_microseconds);
 }
 int64_t TimeStamp::microseconds()
