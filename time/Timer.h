@@ -14,7 +14,7 @@ private:
     std::function<void()> CallBack; // 到达时间戳后采取的行为
 
 public:
-    Timer(double _interval, TimeStamp Now, std::function<void()> CallBack);
+    Timer(double _interval, TimeStamp expiration, std::function<void()> CallBack);
     void run();
     bool IsRepeat();
     TimeStamp getExpirationTime();

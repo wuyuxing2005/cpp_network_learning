@@ -1,8 +1,7 @@
 #include "base/EventLoop.h"
 
-EventLoop::EventLoop()
+EventLoop::EventLoop() : ep(std::make_unique<epoll>()), timequeue(this)
 {
-    ep = std::make_unique<epoll>();
 }
 
 EventLoop::~EventLoop()
@@ -47,4 +46,20 @@ void EventLoop::PushFuncInToDoList(std::function<void()> cb)
 {
     std::lock_guard<std::mutex> guard(mutex_);
     to_do_list_.emplace_back(std::move(cb));
+}
+void EventLoop::RUnAfter(double wait_time, std::function<void()> &cb)
+{
+    TimeStamp timestamp = TimeStamp::AddTime(TimeStamp::getNowTime(), wait_time);
+    RunAt(&timestamp, cb);
+}
+void EventLoop::RunAt(TimeStamp *timestamp, std::function<void()> &cb)
+{
+    Timer *timer = new Timer(0.0, *timestamp, cb);
+    timequeue.AddTimer(timer);
+}
+void EventLoop::RunEvery(double wait_time, std::function<void()> &cb)
+{
+    TimeStamp timestamp = TimeStamp::AddTime(TimeStamp::getNowTime(), wait_time);
+    Timer *timer = new Timer(wait_time, timestamp, cb);
+    timequeue.AddTimer(timer);
 }

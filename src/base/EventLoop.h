@@ -6,9 +6,11 @@
 #include <functional>
 #include <memory>
 #include <mutex>
-#include "./time/TimeStamp.h"
+#include "time/TimeQueue.h"
+#include "time/TimeStamp.h"
 class epoll;
 class TimeStamp;
+class TimeQueue;
 class channel;
 class EventLoop
 {
@@ -16,6 +18,7 @@ private:
     std::unique_ptr<epoll> ep;
     std::vector<std::function<void()>> to_do_list_;
     std::mutex mutex_;
+    TimeQueue timequeue;
 
 public:
     EventLoop();

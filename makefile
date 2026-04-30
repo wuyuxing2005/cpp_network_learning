@@ -14,7 +14,9 @@ COMMON_SRC := \
 	src/EventLoop.cpp \
 	src/Acceptor.cpp \
 	src/Connection.cpp \
-	src/Buffer.cpp
+	src/Buffer.cpp \
+	time/Timer.cpp \
+	time/TimeQueue.cpp
 
 HTTP_SERVER_SRC := \
 	HttpServer.cpp \
