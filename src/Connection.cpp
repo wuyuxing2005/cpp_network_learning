@@ -42,6 +42,7 @@ Connection::Connection(EventLoop *_loop, std::unique_ptr<mysocket> _mysc) // 负
     readBuffer = std::make_unique<Buffer>();
     sendBuffer = std::make_unique<Buffer>();
     http_context = std::make_unique<HttpContext>();
+    last_active_time_ = TimeStamp::getNowTime();
 }
 
 Connection::~Connection()
@@ -209,4 +210,12 @@ mysocket *Connection::getsocket()
 HttpContext *Connection::context()
 {
     return http_context.get();
+}
+void Connection::UpdateTimeStamp(TimeStamp now)
+{
+    last_active_time_ = now;
+}
+TimeStamp Connection::timestamp() const
+{
+    return last_active_time_;
 }

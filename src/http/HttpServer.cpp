@@ -64,6 +64,9 @@ void HttpServer::HttpOnMessage(Connection *conn)
         conn->close0();
         return;
     }
+    conn->UpdateTimeStamp(TimeStamp::getNowTime());
+    ScheduleAutoClose(conn);
+
     HttpContext *ctx = conn->context();
     bool is_complete = ctx->ParaseRequest(conn->getReadBuffer().c_str(), conn->getReadBuffer().size());
     if (!is_complete)
@@ -107,4 +110,28 @@ void HttpServer::OnRequest(Connection *conn, HttpRequest *request)
         return;
     }
     conn->context()->ResetContextStatus();
+}
+void HttpServer::ScheduleAutoClose(Connection *conn)
+{
+    std::weak_ptr<Connection> weak_conn = conn->weak_from_this();
+    std::function<void()> cb = std::bind(&HttpServer::ActiveCloseConn, this, weak_conn);
+    conn->getLoop()->RunAfter(kAutoCloseTimeoutSeconds, cb);
+}
+void HttpServer::ActiveCloseConn(std::weak_ptr<Connection> weak_conn)
+{
+    std::shared_ptr<Connection> conn = weak_conn.lock();
+    if (!conn || conn->state_ != Connection::State::Connected)
+    {
+        return;
+    }
+
+    TimeStamp expire_time = TimeStamp::AddTime(conn->timestamp(), kAutoCloseTimeoutSeconds);
+    if (expire_time < TimeStamp::getNowTime())
+    {
+        CPP_NETWORK_LOG << "[http-close] fd=" << conn->getsocket()->getFd()
+                        << " reason=idle timeout"
+                        << " timeout=" << kAutoCloseTimeoutSeconds
+                        << '\n';
+        conn->close0();
+    }
 }

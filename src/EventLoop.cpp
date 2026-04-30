@@ -47,7 +47,8 @@ void EventLoop::PushFuncInToDoList(std::function<void()> cb)
     std::lock_guard<std::mutex> guard(mutex_);
     to_do_list_.emplace_back(std::move(cb));
 }
-void EventLoop::RUnAfter(double wait_time, std::function<void()> &cb)
+
+void EventLoop::RunAfter(double wait_time, std::function<void()> &cb)
 {
     TimeStamp timestamp = TimeStamp::AddTime(TimeStamp::getNowTime(), wait_time);
     RunAt(&timestamp, cb);

@@ -8,6 +8,7 @@
 #include <mutex>
 #include "Buffer.h"
 #include "http/HttpContext.h"
+#include "time/TimeStamp.h"
 #define MAX_BUFFER_SIZE 1000
 class channel;
 class EventLoop;
@@ -28,6 +29,7 @@ private:
     std::function<void(Connection *)> functionCallBack;
     std::mutex conn_mtx;
     std::unique_ptr<HttpContext> http_context;
+    TimeStamp last_active_time_;
 
 public:
     enum State
@@ -57,5 +59,7 @@ public:
     void connectionDestructor();
     mysocket *getsocket();
     HttpContext *context();
+    void UpdateTimeStamp(TimeStamp now);
+    TimeStamp timestamp() const;
     ~Connection();
 };
