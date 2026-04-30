@@ -14,9 +14,9 @@ int mysocket::bind(sock_addr *sc_addr)
 {
     return ::bind(fd, (sockaddr *)&(sc_addr->getAddr()), sizeof(sc_addr->getAddr()));
 }
-int mysocket::listen()
+int mysocket::listen(int backlog)
 {
-    return ::listen(fd, SOMAXCONN);
+    return ::listen(fd, backlog);
 }
 int mysocket::accept(sock_addr *sc_addr)
 {

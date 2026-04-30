@@ -14,7 +14,7 @@ public:
     mysocket();
     mysocket(int _fd);
     int bind(sock_addr *sc_addr);
-    int listen();
+    int listen(int backlog = 16384);
     int connect(sock_addr *sock_addr);
     int accept(sock_addr *sc_addr);
     int getFd();

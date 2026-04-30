@@ -59,12 +59,12 @@ void Server::deleteConnection(int fd)
         {
             return;
         }
-        con = it->second;
+        con = it->second; // 此时的connection的引用计数加一，此时connection的引用计数是2，connections中一份，当前con拷贝一份，
         connections.erase(it);
     }
     EventLoop *loop_ = con->getLoop();
     loop_->PushFuncInToDoList(std::bind(&Connection::connectionDestructor, con)); // 因为是拷贝操作，con就是一份额外的connection 的shared_ptr的计数。
-    //在该函数未返回之前实际上con的shared_ptr引用数为3，因为此时还存在一个临时变量con。当该函数返回时就只剩俩了
+    // 在该函数未返回之前实际上con的shared_ptr引用数为3，因为此时还存在一个临时变量con。当该函数返回时就只剩俩了
 }
 void Server::setConnect(std::function<void(Connection *)> _Connect_Callback)
 {
