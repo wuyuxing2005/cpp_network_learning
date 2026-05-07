@@ -8,6 +8,10 @@ Acceptor::Acceptor(EventLoop *_loop) // 该类主要是抽象监听socket
 {
     this->loop = _loop;
     socket = std::make_unique<mysocket>();
+    if (socket->setnonblocking() == -1)
+    {
+        CPP_NETWORK_LOG << "set listen socket nonblocking error: " << std::strerror(errno) << '\n';
+    }
     sc_addr = std::make_unique<sock_addr>("127.0.0.1", 9999);
     socket->bind(sc_addr.get());
     socket->listen();

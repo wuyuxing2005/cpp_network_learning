@@ -67,9 +67,9 @@ channel::~channel()
 
 void channel::handleEventByCallBack()
 {
+    std::shared_ptr<void> guard = tie_.lock();
     if (tied_) // 如果绑定了所对应的Connection，或者说需要注意其对应的Connection是否会提前delete
     {
-        std::shared_ptr<void> guard = tie_.lock();
         if (!guard) // 只有在handleevent之后Connection才会释放
         {
             return;

@@ -126,7 +126,7 @@ void HttpServer::ActiveCloseConn(std::weak_ptr<Connection> weak_conn)
     }
 
     TimeStamp expire_time = TimeStamp::AddTime(conn->timestamp(), kAutoCloseTimeoutSeconds);
-    if (expire_time < TimeStamp::getNowTime())
+    if (expire_time < TimeStamp::getNowTime()) // 应该删除了
     {
         CPP_NETWORK_LOG << "[http-close] fd=" << conn->getsocket()->getFd()
                         << " reason=idle timeout"
