@@ -149,7 +149,7 @@ bool Connection::noBlockedSend()
             send_offset_ += static_cast<std::size_t>(s);
             continue;
         }
-        else if (s == -1 && (errno == EWOULDBLOCK || errno == EAGAIN))
+        else if (s == -1 && (errno == EWOULDBLOCK || errno == EAGAIN))//发送缓冲区满了
         {
             return false;
         }
@@ -185,7 +185,6 @@ void Connection::send0()
         ch->enAbleToWriting();
         return;
     }
-
     sendBuffer->clear_s();
     send_offset_ = 0;
     ch->enAbleToReading();
