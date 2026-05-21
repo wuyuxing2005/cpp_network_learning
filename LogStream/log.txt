@@ -1,0 +1,4 @@
+20260521 10:48:45.906848 12980 INFO This is a test info message. 1.cpp:5
+20260521 10:49:03.132065 13056 INFO This is a test info message. 1.cpp:5
+20260521 10:49:11.788884 13116 INFO This is a test info message. 1.cpp:5
+20260521 10:49:11.788962 13116 ERROR This is a test error message. 1.cpp:6
