@@ -16,6 +16,8 @@ private:
     sem sem_;
     FILE *fp;
     std::thread thread_;
+    bool running;
+
 
 public:
     void start();
@@ -24,23 +26,3 @@ public:
     asyncLogger(const char *filename);
     ~asyncLogger();
 };
-void asyncLogger::start()
-{
-    thread_ = std::thread(&asyncLogger::run, this);
-}
-void asyncLogger ::run()
-{
-}
-void asyncLogger::append(Buffer &buffer)
-{
-    lock_.lock();
-    Buffers_0.push_back(buffer);
-}
-asyncLogger::asyncLogger(const char *filename)
-{
-    fp = fopen(filename, "a");
-}
-
-asyncLogger::~asyncLogger()
-{
-}

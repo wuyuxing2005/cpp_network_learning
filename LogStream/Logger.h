@@ -1,7 +1,7 @@
 #pragma once
 
 #include "LogStream.h"
-
+#include "asyncLogger.h"
 #include <cstring>
 #include <functional>
 #include <string>
@@ -44,6 +44,7 @@ public:
     static void setOutputFunc(std::function<void(const char *msg, int len)> func);
     static void setFlushFunc(std::function<void()> func);
     static void fileOutputFunc(const char *msg, int len);
+    static void asyncOutputFunc(const char *msg, int len);
     int getline();
     LogStream &getStream();
     Logger(const char *_SourceFile, int _line, LogLevel _loglevel);
@@ -67,6 +68,7 @@ private:
         LogStream logstream;
         Logger::SourceFile sf;
     };
+
     Imt *imt;
 };
 #define LOG_INFO                            \

@@ -109,7 +109,19 @@ void Logger::fileOutputFunc(const char *msg, int len)
         fclose(fp);
     }
 }
-
+void Logger::asyncOutputFunc(const char *msg, int len)
+{
+    static asyncLogger asynclog("log.txt");
+    static bool started = false;
+    if (!started)
+    {
+        asynclog.start();
+        started = true;
+    }
+    Buffer buffer;
+    buffer.append(const_cast<char *>(msg), len);
+    asynclog.append(buffer);
+}
 int Logger::Imt::getline()
 {
     return line;
