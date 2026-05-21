@@ -144,6 +144,11 @@ Logger::~Logger()
 {
     imt->getStream() << ' ' << imt->getSourceFileData() << ':' << imt->getline() << '\n';
     g_outputFunc(imt->getStream().getData(), imt->getStream().getLen());
+    if (imt->loglevel == Logger::FATAL)
+    {
+        g_flushFunc();
+        abort();
+    }
     delete imt;
 }
 int Logger::getline()
