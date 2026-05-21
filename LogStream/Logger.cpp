@@ -151,6 +151,7 @@ Logger::~Logger()
     }
     delete imt;
 }
+
 int Logger::getline()
 {
     return imt->getline();

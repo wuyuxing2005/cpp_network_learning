@@ -1,5 +1,5 @@
 #include "src/http/HttpServer.h"
-#include "src/base/DebugLog.h"
+#include "LogStream/Logger.h"
 #include <iostream>
 #include <string>
 #include <unistd.h>
@@ -43,31 +43,12 @@ void HttpResponseCallback(const HttpRequest &request, HttpResponse *response)
     return;
 } // 需要放在main之前，因为会导致你bind的时候bind的是一个空的
 
-namespace
-{
-bool ShouldEnableLog(int argc, char *argv[])
-{
-    for (int i = 1; i < argc; ++i)
-    {
-        std::string arg = argv[i];
-        if (arg == "--log" || arg == "-l" || arg == "--log=1")
-        {
-            return true;
-        }
-        if (arg == "--no-log" || arg == "--log=0")
-        {
-            return false;
-        }
-    }
-    return false;
-}
-}
-
 int main(int argc, char *argv[])
 {
-    debuglog::SetEnabled(ShouldEnableLog(argc, argv));
-    CPP_NETWORK_LOG << "[http-main] starting HTTP server pid=" << getpid() << '\n';
+
     HttpServer *Server = new HttpServer();
+    Logger::setOutputFunc(Logger::fileOutputFunc);
+    LOG_INFO << "Http Server is running on port 8080";
     Server->setHandleHttpServerCallBack(std::bind(&HttpResponseCallback, std::placeholders::_1, std::placeholders::_2));
     Server->start();
 }
