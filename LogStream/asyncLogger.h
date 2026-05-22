@@ -7,17 +7,19 @@
 #include <queue>
 #include <string>
 #include <thread>
+#include <atomic>
 class asyncLogger
 {
 private:
     std::vector<Buffer> Buffers_0;
     std::vector<Buffer> Buffers_1;
     locker lock_;
-    sem sem_;
+    cond cond_;
     FILE *fp;
     std::thread thread_;
-    bool running;
-
+    std::atomic<bool> running;
+    size_t buffer0Bytes_;
+    size_t maxBufferBytes_;
 
 public:
     void start();
