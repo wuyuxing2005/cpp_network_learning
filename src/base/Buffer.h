@@ -9,6 +9,7 @@ private:
 
 public:
     Buffer();
+    Buffer(char *str);
     ~Buffer();
     std::istream &inputLine();
     std::string getString();

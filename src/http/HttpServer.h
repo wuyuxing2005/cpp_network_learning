@@ -5,6 +5,7 @@
 #include "HttpResponse.h"
 #include <memory>
 
+#include "base/DebugLog.h"
 constexpr double kAutoCloseTimeoutSeconds = 100.0;
 
 class HttpServer

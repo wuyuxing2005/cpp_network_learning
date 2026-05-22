@@ -76,9 +76,9 @@ public:
     {
         pthread_cond_destroy(&cond0);
     }
-    bool wait(pthread_mutex_t &mutex)
+    bool wait(pthread_mutex_t *mutex)
     {
-        return pthread_cond_wait(&cond0, &mutex) == 0;
+        return pthread_cond_wait(&cond0, mutex) == 0;
     }
     bool signal()
     {
@@ -88,9 +88,9 @@ public:
     {
         return pthread_cond_broadcast(&cond0) == 0;
     }
-    bool time_wait(struct timespec time, pthread_mutex_t &mutex)
+    bool time_wait(struct timespec time, pthread_mutex_t *mutex)
     {
-        return pthread_cond_timedwait(&cond0, &mutex, &time);
+        return pthread_cond_timedwait(&cond0, mutex, &time);
     }
 };
 #endif

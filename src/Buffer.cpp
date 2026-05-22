@@ -2,7 +2,10 @@
 Buffer::Buffer()
 {
 }
-
+Buffer::Buffer(char *str)
+{
+    s = std::string(str);
+}
 Buffer::~Buffer()
 {
 }

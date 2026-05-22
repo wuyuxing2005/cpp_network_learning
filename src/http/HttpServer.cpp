@@ -1,6 +1,5 @@
-#include "HttpServer.h"
-#include "base/DebugLog.h"
 
+#include "HttpServer.h"
 namespace
 {
     std::string PreviewRequest(const std::string &buffer, std::size_t max_len = 120)
