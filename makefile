@@ -15,6 +15,9 @@ COMMON_SRC := \
 	src/Acceptor.cpp \
 	src/Connection.cpp \
 	src/Buffer.cpp \
+	LogStream/Logger.cpp \
+	LogStream/LogStream.cpp \
+	LogStream/asyncLogger.cpp \
 	time/Timer.cpp \
 	time/TimeQueue.cpp
 
@@ -30,14 +33,10 @@ CLIENT_SRC := \
 	$(COMMON_SRC) \
 	$(HTTP_CORE_SRC)
 
-TEST_SRC := \
-	test.cpp \
-	$(COMMON_SRC) \
-	$(HTTP_CORE_SRC)
 
 .PHONY: all clean
 
-all: server client test
+all: server client
 
 server: $(HTTP_SERVER_SRC)
 	$(CXX) $(CXXFLAGS) $(HTTP_SERVER_SRC) -o $@
@@ -45,10 +44,6 @@ server: $(HTTP_SERVER_SRC)
 client: $(CLIENT_SRC)
 	$(CXX) $(CXXFLAGS) $(CLIENT_SRC) -o $@
 
-test: $(TEST_SRC)
-	$(CXX) $(CXXFLAGS) $(TEST_SRC) -o $@
-
 clean:
-	rm -f server client test
-
+	rm -f server client
 

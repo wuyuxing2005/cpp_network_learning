@@ -1,2 +1,50 @@
-20260522 14:41:06.230729 11599 INFO This is a test info message. 1.cpp:8
-20260522 14:41:06.230866 11599 ERROR This is a test error message. 1.cpp:9
+20260522 15:21:54.702031 23838 INFO Http Server is running on port 8080 HttpServer.cpp:51
+20260522 15:21:54.702146 23838 INFO Server Start Now Server.cpp:36
+20260522 15:22:06.295198 23838 INFO Accept From Port : 11275 ip: 127.0.0.1
+ Acceptor.cpp:44
+20260522 15:22:06.295238 23838 INFO Accept From Port : 5685 ip: 127.0.0.1
+ Acceptor.cpp:44
+20260522 15:22:06.295677 23842 INFO [http-request] fd=48 method=GET url=/hello
+ HttpServer.cpp:84
+20260522 15:22:06.295690 23842 INFO [http-response] fd=48 method=GET url=/hello connection=keep-alive
+ HttpServer.cpp:95
+20260522 15:22:06.353050 23842 INFO [http-request] fd=48 method=GET url=/favicon.ico
+ HttpServer.cpp:84
+20260522 15:22:06.353060 23842 INFO [http-response] fd=48 method=GET url=/favicon.ico connection=keep-alive
+ HttpServer.cpp:95
+20260522 15:22:06.557409 23838 INFO Accept From Port : 53812 ip: 127.0.0.1
+ Acceptor.cpp:44
+20260522 15:22:09.276304 23842 INFO [conn-peer-close] fd=48 buffered_bytes=0 preview=""
+ Connection.cpp:114
+20260522 15:22:09.276281 23850 INFO [conn-peer-close] fd=47 buffered_bytes=0 preview=""
+ Connection.cpp:114
+20260522 15:22:09.276318 23842 INFO [http-close] fd=48 reason=peer closed buffered_bytes=0
+ HttpServer.cpp:60
+20260522 15:22:09.276325 23850 INFO [http-close] fd=47 reason=peer closed buffered_bytes=0
+ HttpServer.cpp:60
+20260522 15:22:09.276384 23846 INFO [conn-peer-close] fd=49 buffered_bytes=0 preview=""
+ Connection.cpp:114
+20260522 15:22:09.276399 23846 INFO [http-close] fd=49 reason=peer closed buffered_bytes=0
+ HttpServer.cpp:60
+20260522 15:22:33.519542 23838 INFO Accept From Port : 19978 ip: 127.0.0.1
+ Acceptor.cpp:44
+20260522 15:22:33.519690 23838 INFO Accept From Port : 29211 ip: 127.0.0.1
+ Acceptor.cpp:44
+20260522 15:22:33.519716 23850 INFO [http-request] fd=47 method=GET url=/hello
+ HttpServer.cpp:84
+20260522 15:22:33.519729 23850 INFO [http-response] fd=47 method=GET url=/hello connection=keep-alive
+ HttpServer.cpp:95
+20260522 15:22:33.550454 23850 INFO [http-request] fd=47 method=GET url=/favicon.ico
+ HttpServer.cpp:84
+20260522 15:22:33.550467 23850 INFO [http-response] fd=47 method=GET url=/favicon.ico connection=keep-alive
+ HttpServer.cpp:95
+20260522 15:22:33.790923 23838 INFO Accept From Port : 32520 ip: 127.0.0.1
+ Acceptor.cpp:44
+20260522 15:22:44.293286 23850 INFO [http-request] fd=47 method=GET url=/
+ HttpServer.cpp:84
+20260522 15:22:44.293302 23850 INFO [http-response] fd=47 method=GET url=/ connection=keep-alive
+ HttpServer.cpp:95
+20260522 15:22:44.324388 23850 INFO [http-request] fd=47 method=GET url=/favicon.ico
+ HttpServer.cpp:84
+20260522 15:22:44.324450 23850 INFO [http-response] fd=47 method=GET url=/favicon.ico connection=keep-alive
+ HttpServer.cpp:95

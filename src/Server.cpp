@@ -1,7 +1,8 @@
+
 #include "base/Server.h"
 #include "base/Connection.h"
-#include "base/DebugLog.h"
 #include <bits/std_thread.h>
+#include <LogStream/Logger.h>
 Server ::Server(EventLoop *_loop)
 {
     this->MainReactor = _loop;
@@ -32,7 +33,7 @@ Server::~Server()
 }
 void Server::start() // 在创建实例后手动开启
 {
-    CPP_NETWORK_LOG << "Server Start Now" << '\n';
+    LOG_INFO << "Server Start Now";
     MainReactor->beginLoop(); // 此处是开始寻找loop中的epoll中的已注册的发生事件的channel，并根据channel中的CallBack函数来进行具体的操作。也就是 **启动服务器的操作**
 }
 void Server::newConnection(std::unique_ptr<mysocket> mysc) // acceptor中的回调函数

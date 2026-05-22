@@ -47,8 +47,8 @@ int main(int argc, char *argv[])
 {
 
     HttpServer *Server = new HttpServer();
-    Logger::setOutputFunc(Logger::fileOutputFunc);
-    LOG_INFO << "Http Server is running on port 8080";
+    Logger::setOutputFunc(Logger::asyncOutputFunc);
+    LOG_INFO << "Http Server is running on port 9999";
     Server->setHandleHttpServerCallBack(std::bind(&HttpResponseCallback, std::placeholders::_1, std::placeholders::_2));
     Server->start();
 }

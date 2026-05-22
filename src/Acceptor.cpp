@@ -1,6 +1,6 @@
 #include "base/Acceptor.h"
-#include "base/DebugLog.h"
 #include "base/set_noblocking.h"
+#include "LogStream/Logger.h"
 #include <cerrno>
 #include <cstring>
 #include <iostream>
@@ -10,7 +10,7 @@ Acceptor::Acceptor(EventLoop *_loop) // 该类主要是抽象监听socket
     socket = std::make_unique<mysocket>();
     if (socket->setnonblocking() == -1)
     {
-        CPP_NETWORK_LOG << "set listen socket nonblocking error: " << std::strerror(errno) << '\n';
+        LOG_INFO << "set listen socket nonblocking error: " << std::strerror(errno) << '\n';
     }
     sc_addr = std::make_unique<sock_addr>("127.0.0.1", 9999);
     socket->bind(sc_addr.get());
@@ -36,15 +36,15 @@ void Acceptor::accpetNewConnection() // 启动accpetor
             {
                 continue;
             }
-            CPP_NETWORK_LOG << "accept error: " << std::strerror(errno) << '\n';
+            LOG_INFO << "accept error: " << std::strerror(errno) << '\n';
             break;
         }
 
         setnonblocking(client_fd);
-        CPP_NETWORK_LOG << "Accept From "
-                        << "Port : " << sc_addr->getAddr().sin_port
-                        << " ip: " << network_to_shifen(sc_addr->getAddr().sin_addr.s_addr)
-                        << '\n';
+        LOG_INFO << "Accept From "
+                 << "Port : " << sc_addr->getAddr().sin_port
+                 << " ip: " << network_to_shifen(sc_addr->getAddr().sin_addr.s_addr)
+                 << '\n';
         std::unique_ptr<mysocket> client_socket = std::make_unique<mysocket>(client_fd);
         client_socket->setBlock(false);
         CallBack(std::move(client_socket)); // 使用Server中的newconnection

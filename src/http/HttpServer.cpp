@@ -1,5 +1,6 @@
 
 #include "HttpServer.h"
+#include "LogStream/Logger.h"
 namespace
 {
     std::string PreviewRequest(const std::string &buffer, std::size_t max_len = 120)
@@ -56,10 +57,10 @@ void HttpServer::HttpOnMessage(Connection *conn)
     conn->recv0();
     if (conn->state_ != Connection::State::Connected)
     {
-        CPP_NETWORK_LOG << "[http-close] fd=" << conn->getsocket()->getFd()
-                        << " reason=peer closed"
-                        << " buffered_bytes=" << conn->getReadBuffer().size()
-                        << '\n';
+        LOG_INFO << "[http-close] fd=" << conn->getsocket()->getFd()
+                 << " reason=peer closed"
+                 << " buffered_bytes=" << conn->getReadBuffer().size()
+                 << '\n';
         conn->close0();
         return;
     }
@@ -70,20 +71,20 @@ void HttpServer::HttpOnMessage(Connection *conn)
     bool is_complete = ctx->ParaseRequest(conn->getReadBuffer().c_str(), conn->getReadBuffer().size());
     if (!is_complete)
     {
-        CPP_NETWORK_LOG << "[http-close] fd=" << conn->getsocket()->getFd()
-                        << " reason=bad request"
-                        << " raw=\"" << PreviewRequest(conn->getReadBuffer()) << "\""
-                        << '\n';
+        LOG_INFO << "[http-close] fd=" << conn->getsocket()->getFd()
+                 << " reason=bad request"
+                 << " raw=\"" << PreviewRequest(conn->getReadBuffer()) << "\""
+                 << '\n';
         conn->setSendBuffer("HTTP/1.1 400 Bad Request\r\n\r\n");
         conn->setCloseAfterWrite(true);
         conn->send0();
     }
     else
     {
-        CPP_NETWORK_LOG << "[http-request] fd=" << conn->getsocket()->getFd()
-                        << " method=" << ctx->request()->GetMethodString()
-                        << " url=" << ctx->request()->url()
-                        << '\n';
+        LOG_INFO << "[http-request] fd=" << conn->getsocket()->getFd()
+                 << " method=" << ctx->request()->GetMethodString()
+                 << " url=" << ctx->request()->url()
+                 << '\n';
         OnRequest(conn, ctx->request());
     }
 }
@@ -91,7 +92,7 @@ void HttpServer::OnRequest(Connection *conn, HttpRequest *request)
 {
     HttpResponse response(false);
     make_response_callback_(*request, &response); // 创建response
-    CPP_NETWORK_LOG << "[http-response] fd=" << conn->getsocket()->getFd()
+    LOG_INFO << "[http-response] fd=" << conn->getsocket()->getFd()
                     << " method=" << request->GetMethodString()
                     << " url=" << request->url()
                     << " connection=" << (response.IsCloseConnection() ? "close" : "keep-alive")
@@ -101,7 +102,7 @@ void HttpServer::OnRequest(Connection *conn, HttpRequest *request)
     conn->send0();
     if (response.IsCloseConnection())
     {
-        CPP_NETWORK_LOG << "[http-close] fd=" << conn->getsocket()->getFd()
+        LOG_INFO << "[http-close] fd=" << conn->getsocket()->getFd()
                         << " reason=response requested close"
                         << " method=" << request->GetMethodString()
                         << " url=" << request->url()
@@ -127,7 +128,7 @@ void HttpServer::ActiveCloseConn(std::weak_ptr<Connection> weak_conn)
     TimeStamp expire_time = TimeStamp::AddTime(conn->timestamp(), kAutoCloseTimeoutSeconds);
     if (expire_time < TimeStamp::getNowTime()) // 应该删除了
     {
-        CPP_NETWORK_LOG << "[http-close] fd=" << conn->getsocket()->getFd()
+        LOG_INFO << "[http-close] fd=" << conn->getsocket()->getFd()
                         << " reason=idle timeout"
                         << " timeout=" << kAutoCloseTimeoutSeconds
                         << '\n';

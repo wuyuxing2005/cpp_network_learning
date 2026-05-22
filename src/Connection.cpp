@@ -1,5 +1,5 @@
 #include "base/Connection.h"
-#include "base/DebugLog.h"
+#include "LogStream/Logger.h"
 
 namespace
 {
@@ -111,7 +111,7 @@ void Connection::noBlockedRecv()
         else if (bytes_read == 0)
         {
             const std::string current_buffer = readBuffer->getString();
-            CPP_NETWORK_LOG << "[conn-peer-close] fd=" << mysc->getFd()
+            LOG_INFO << "[conn-peer-close] fd=" << mysc->getFd()
                             << " buffered_bytes=" << current_buffer.size()
                             << " preview=\"" << PreviewBuffer(current_buffer) << "\""
                             << '\n';
@@ -124,7 +124,7 @@ void Connection::noBlockedRecv()
         }
         else
         {
-            CPP_NETWORK_LOG << "error " << strerror(errno) << '\n';
+            LOG_INFO << "error " << strerror(errno) << '\n';
             state_ = State::Failed;
             break;
         }
@@ -149,7 +149,7 @@ bool Connection::noBlockedSend()
             send_offset_ += static_cast<std::size_t>(s);
             continue;
         }
-        else if (s == -1 && (errno == EWOULDBLOCK || errno == EAGAIN))//发送缓冲区满了
+        else if (s == -1 && (errno == EWOULDBLOCK || errno == EAGAIN)) // 发送缓冲区满了
         {
             return false;
         }
@@ -159,7 +159,7 @@ bool Connection::noBlockedSend()
         }
         else
         {
-            CPP_NETWORK_LOG << "error " << strerror(errno) << '\n';
+            LOG_INFO << "error " << strerror(errno) << '\n';
             state_ = State::Failed;
             return false;
         }
