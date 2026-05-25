@@ -56,5 +56,9 @@
         "thread": "cpp",
         "cinttypes": "cpp",
         "typeinfo": "cpp"
-    }
+    },
+    "remote.extensionKind": {
+        "vizards.deepseek-v4-for-copilot": ["ui"]
+    
+}
 }
