@@ -58,11 +58,11 @@ void Connection::connectionDestructor()
 void Connection::registerCallBack()
 {
     ch->Tie(shared_from_this());
-    ch->setReadCallBack(std::bind(&Connection::handleFunctionCallBack, this));
+    ch->setReadCallBack(std::bind(&Connection::handleReadCallBack, this));
     ch->setWriteCallBack(std::bind(&Connection::handleWriteCallBack, this));
     ch->enAbleToReading();
 }
-void Connection::handleFunctionCallBack()
+void Connection::handleReadCallBack()
 {
     functionCallBack(this);
 }
@@ -85,9 +85,7 @@ void Connection::setDeleteConnectionCallBack(std::function<void(int)> CallBack)
 
 void Connection::setSendBuffer(std::string s)
 {
-    sendBuffer->clear_s(); // 清空sendBuffer
-    sendBuffer->append((char *)s.c_str(), s.size());
-    send_offset_ = 0;
+    sendBuffer->append(s);
 }
 
 std::string Connection::getReadBuffer()
@@ -112,9 +110,9 @@ void Connection::noBlockedRecv()
         {
             const std::string current_buffer = readBuffer->getString();
             LOG_INFO << "[conn-peer-close] fd=" << mysc->getFd()
-                            << " buffered_bytes=" << current_buffer.size()
-                            << " preview=\"" << PreviewBuffer(current_buffer) << "\""
-                            << '\n';
+                     << " buffered_bytes=" << current_buffer.size()
+                     << " preview=\"" << PreviewBuffer(current_buffer) << "\""
+                     << '\n';
             state_ = State::Closed;
             break;
         }
@@ -137,34 +135,33 @@ bool Connection::noBlockedSend()
     {
         return true;
     }
-    const char *buffer = sendBuffer->getChar_c();
-    while (send_offset_ < static_cast<std::size_t>(size))
+
+    ssize_t n = send(mysc->getFd(), sendBuffer->getChar_c(), size, 0);
+
+    if (n > 0)
     {
-        ssize_t s = send(mysc->getFd(),
-                         buffer + send_offset_,
-                         size - static_cast<int>(send_offset_),
-                         0);
-        if (s > 0)
-        {
-            send_offset_ += static_cast<std::size_t>(s);
-            continue;
-        }
-        else if (s == -1 && (errno == EWOULDBLOCK || errno == EAGAIN)) // 发送缓冲区满了
-        {
-            return false;
-        }
-        else if (s == -1 && errno == EINTR) // 发送中断
-        {
-            continue;
-        }
-        else
-        {
-            LOG_INFO << "error " << strerror(errno) << '\n';
-            state_ = State::Failed;
-            return false;
-        }
+        sendBuffer->Retrieve(static_cast<int>(n));
     }
-    return true;
+    else if (n == 0)
+    {
+        return false;
+    }
+    else if (n == -1 && (errno == EWOULDBLOCK || errno == EAGAIN))
+    {
+        return false;
+    }
+    else if (n == -1 && errno == EINTR)
+    {
+        return false;
+    }
+    else
+    {
+        LOG_INFO << "error " << strerror(errno) << '\n';
+        state_ = State::Failed;
+        return false;
+    }
+
+    return sendBuffer->getSize() == 0;
 }
 void Connection::recv0()
 {
@@ -186,7 +183,6 @@ void Connection::send0()
         return;
     }
     sendBuffer->clear_s();
-    send_offset_ = 0;
     ch->enAbleToReading();
     if (close_after_write_)
     {

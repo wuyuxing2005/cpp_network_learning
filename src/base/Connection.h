@@ -23,7 +23,6 @@ private:
     std::unique_ptr<channel> ch;
     std::unique_ptr<Buffer> readBuffer;
     std::unique_ptr<Buffer> sendBuffer;
-    std::size_t send_offset_{0};
     bool close_after_write_{false};
     std::function<void(int)> deleteCallBack;
     std::function<void(Connection *)> functionCallBack;
@@ -50,7 +49,7 @@ public:
     void send0();
     void noBlockedRecv();
     bool noBlockedSend();
-    void handleFunctionCallBack();
+    void handleReadCallBack();
     void handleWriteCallBack();
     EventLoop *getLoop();
     void setFunctionCallBack(std::function<void(Connection *)> functionCallBack);
