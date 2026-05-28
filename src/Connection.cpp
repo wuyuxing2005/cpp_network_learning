@@ -137,6 +137,8 @@ bool Connection::noBlockedSend()
     }
 
     ssize_t n = send(mysc->getFd(), sendBuffer->getChar_c(), size, 0);
+    // 只进行一次send，如果一次send就发送完了，那么久直接返回true。
+    // 否则的话注册写事件到epoll中。
 
     if (n > 0)
     {

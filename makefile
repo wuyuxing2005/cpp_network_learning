@@ -36,13 +36,13 @@ CLIENT_SRC := \
 
 .PHONY: all clean
 
-all: server client
+all: server #client
 
 server: $(HTTP_SERVER_SRC)
 	$(CXX) $(CXXFLAGS) $(HTTP_SERVER_SRC) -o $@
 
-client: $(CLIENT_SRC)
-	$(CXX) $(CXXFLAGS) $(CLIENT_SRC) -o $@
+#client: $(CLIENT_SRC)
+#	$(CXX) $(CXXFLAGS) $(CLIENT_SRC) -o $@
 
 clean:
 	rm -f server client

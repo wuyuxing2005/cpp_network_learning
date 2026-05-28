@@ -3,6 +3,7 @@
 #include "base/Connection.h"
 #include <bits/std_thread.h>
 #include <LogStream/Logger.h>
+#include <unistd.h>
 Server ::Server(EventLoop *_loop)
 {
     this->MainReactor = _loop;
@@ -27,6 +28,11 @@ Server ::Server(EventLoop *_loop)
         thread_pool->append(cb);
         i += 1;
     }
+    std::function<void()> clear_log_c = []()
+    {
+        ::truncate("log.txt", 0);
+    };
+    MainReactor->RunEvery(60, clear_log_c);
 }
 Server::~Server()
 {
