@@ -7,12 +7,20 @@
 std::string ReadFile(const std::string &path)
 {
     std::ifstream is(path.c_str(), std::ifstream::in);
+    if (!is.is_open())
+    {
+        return "";
+    }
 
     // 寻找文件末端
     is.seekg(0, is.end);
 
     // 获取长度
-    int flength = is.tellg();
+    std::streampos flength = is.tellg();
+    if (flength <= 0)
+    {
+        return "";
+    }
 
     // 重新定位
     is.seekg(0, is.beg);
@@ -21,6 +29,7 @@ std::string ReadFile(const std::string &path)
     // 读取文件
     is.read(buffer, flength);
     std::string msg(buffer, flength);
+    delete[] buffer;
     return msg;
 }
 void HttpResponseCallback(const HttpRequest &request, HttpResponse *response) // 创建response
@@ -33,7 +42,7 @@ void HttpResponseCallback(const HttpRequest &request, HttpResponse *response) //
 
         if (url == "/")
         {
-            std::string body = ReadFile("static_page/index.htm");
+            std::string body = ReadFile("static_page/index.html");
             response->SetStatusCode(HttpResponse::HttpStatusCode::k200K);
             response->SetBody(body);
             response->SetContentType("text/html");

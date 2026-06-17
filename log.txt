@@ -1,0 +1,32 @@
+20260617 12:12:00.195941 3090 INFO Http Server is running on port 9999 HttpServer.cpp:114
+20260617 12:12:00.197250 3090 INFO Server Start Now Server.cpp:42
+20260617 12:12:02.192505 3090 INFO Accept From Port : 16002 ip: 127.0.0.1
+ Acceptor.cpp:44
+20260617 12:12:02.192627 3098 INFO [http-request] fd=47 method=GET url=/
+ HttpServer.cpp:84
+20260617 12:12:02.196455 3098 INFO [http-response] fd=47 method=GET url=/ connection=keep-alive
+ HttpServer.cpp:95
+20260617 12:12:02.196652 3098 INFO [conn-peer-close] fd=47 buffered_bytes=0 preview=""
+ Connection.cpp:112
+20260617 12:12:02.196655 3098 INFO [http-close] fd=47 reason=peer closed buffered_bytes=0
+ HttpServer.cpp:60
+20260617 12:12:10.380225 3122 INFO Http Server is running on port 9999 HttpServer.cpp:114
+20260617 12:12:10.381232 3122 INFO Server Start Now Server.cpp:42
+20260617 12:12:12.375830 3122 INFO Accept From Port : 26242 ip: 127.0.0.1
+ Acceptor.cpp:44
+20260617 12:12:12.375942 3128 INFO [http-request] fd=47 method=GET url=/mhw
+ HttpServer.cpp:84
+20260617 12:12:12.378300 3128 INFO [http-response] fd=47 method=GET url=/mhw connection=keep-alive
+ HttpServer.cpp:95
+20260617 12:12:12.378458 3128 INFO [conn-peer-close] fd=47 buffered_bytes=0 preview=""
+ Connection.cpp:112
+20260617 12:12:12.378463 3128 INFO [http-close] fd=47 reason=peer closed buffered_bytes=0
+ HttpServer.cpp:60
+20260617 12:12:12.382911 3122 INFO Accept From Port : 30338 ip: 127.0.0.1
+ Acceptor.cpp:44
+20260617 12:12:12.382983 3128 INFO [http-request] fd=47 method=GET url=/nonexistent
+ HttpServer.cpp:84
+20260617 12:12:12.382992 3128 INFO [http-response] fd=47 method=GET url=/nonexistent connection=close
+ HttpServer.cpp:95
+20260617 12:12:12.383024 3128 INFO [http-close] fd=47 reason=response requested close method=GET url=/nonexistent
+ HttpServer.cpp:105

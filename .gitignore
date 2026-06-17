@@ -1,0 +1,6 @@
+
+# Python runtime artifacts (auto-added by gitIssueAssitant)
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
