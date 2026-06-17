@@ -1,0 +1,9 @@
+image: ubuntu:22.04
+working_dir: .
+allow_network: true
+timeout_seconds: 300
+install:
+  - apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends build-essential make curl apache2-utils ca-certificates && rm -rf /var/lib/apt/lists/*
+test:
+  - make clean && make
+lint: []
