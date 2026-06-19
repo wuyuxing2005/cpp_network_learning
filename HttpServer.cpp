@@ -42,7 +42,7 @@ void HttpResponseCallback(const HttpRequest &request, HttpResponse *response) //
 
         if (url == "/")
         {
-            std::string body = ReadFile("static_page/index.html");
+            std::string body = ReadFile("static_page/index.htm");
             response->SetStatusCode(HttpResponse::HttpStatusCode::k200K);
             response->SetBody(body);
             response->SetContentType("text/html");
