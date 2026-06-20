@@ -1,32 +1,44 @@
-20260617 12:12:00.195941 3090 INFO Http Server is running on port 9999 HttpServer.cpp:114
-20260617 12:12:00.197250 3090 INFO Server Start Now Server.cpp:42
-20260617 12:12:02.192505 3090 INFO Accept From Port : 16002 ip: 127.0.0.1
+20260620 11:22:55.253984 2535 INFO Http Server is running on port 9999 HttpServer.cpp:114
+20260620 11:22:55.254083 2535 INFO Server Start Now Server.cpp:42
+20260620 11:23:12.545783 2535 INFO Accept From Port : 54040 ip: 127.0.0.1
  Acceptor.cpp:44
-20260617 12:12:02.192627 3098 INFO [http-request] fd=47 method=GET url=/
- HttpServer.cpp:84
-20260617 12:12:02.196455 3098 INFO [http-response] fd=47 method=GET url=/ connection=keep-alive
- HttpServer.cpp:95
-20260617 12:12:02.196652 3098 INFO [conn-peer-close] fd=47 buffered_bytes=0 preview=""
- Connection.cpp:112
-20260617 12:12:02.196655 3098 INFO [http-close] fd=47 reason=peer closed buffered_bytes=0
- HttpServer.cpp:60
-20260617 12:12:10.380225 3122 INFO Http Server is running on port 9999 HttpServer.cpp:114
-20260617 12:12:10.381232 3122 INFO Server Start Now Server.cpp:42
-20260617 12:12:12.375830 3122 INFO Accept From Port : 26242 ip: 127.0.0.1
+20260620 11:23:12.546244 2535 INFO Accept From Port : 34581 ip: 127.0.0.1
  Acceptor.cpp:44
-20260617 12:12:12.375942 3128 INFO [http-request] fd=47 method=GET url=/mhw
+20260620 11:23:12.552139 2543 INFO [http-request] fd=47 method=GET url=/hello
  HttpServer.cpp:84
-20260617 12:12:12.378300 3128 INFO [http-response] fd=47 method=GET url=/mhw connection=keep-alive
+20260620 11:23:12.552165 2543 INFO [http-response] fd=47 method=GET url=/hello connection=close
  HttpServer.cpp:95
-20260617 12:12:12.378458 3128 INFO [conn-peer-close] fd=47 buffered_bytes=0 preview=""
- Connection.cpp:112
-20260617 12:12:12.378463 3128 INFO [http-close] fd=47 reason=peer closed buffered_bytes=0
- HttpServer.cpp:60
-20260617 12:12:12.382911 3122 INFO Accept From Port : 30338 ip: 127.0.0.1
- Acceptor.cpp:44
-20260617 12:12:12.382983 3128 INFO [http-request] fd=47 method=GET url=/nonexistent
- HttpServer.cpp:84
-20260617 12:12:12.382992 3128 INFO [http-response] fd=47 method=GET url=/nonexistent connection=close
- HttpServer.cpp:95
-20260617 12:12:12.383024 3128 INFO [http-close] fd=47 reason=response requested close method=GET url=/nonexistent
+20260620 11:23:12.552208 2543 INFO [http-close] fd=47 reason=response requested close method=GET url=/hello
  HttpServer.cpp:105
+20260620 11:23:12.608591 2544 INFO [http-request] fd=48 method=GET url=/favicon.ico
+ HttpServer.cpp:84
+20260620 11:23:12.608614 2544 INFO [http-response] fd=48 method=GET url=/favicon.ico connection=close
+ HttpServer.cpp:95
+20260620 11:23:12.608648 2544 INFO [http-close] fd=48 reason=response requested close method=GET url=/favicon.ico
+ HttpServer.cpp:105
+20260620 11:23:14.002124 2535 INFO Accept From Port : 786 ip: 127.0.0.1
+ Acceptor.cpp:44
+20260620 11:23:14.002353 2535 INFO Accept From Port : 51987 ip: 127.0.0.1
+ Acceptor.cpp:44
+20260620 11:23:14.003797 2543 INFO [http-request] fd=47 method=GET url=/hello
+ HttpServer.cpp:84
+20260620 11:23:14.003807 2543 INFO [http-response] fd=47 method=GET url=/hello connection=close
+ HttpServer.cpp:95
+20260620 11:23:14.003830 2543 INFO [http-close] fd=47 reason=response requested close method=GET url=/hello
+ HttpServer.cpp:105
+20260620 11:23:30.021306 2535 INFO Accept From Port : 32273 ip: 127.0.0.1
+ Acceptor.cpp:44
+20260620 11:23:30.022511 2544 INFO [http-request] fd=48 method=GET url=/
+ HttpServer.cpp:84
+20260620 11:23:30.030982 2544 INFO [http-response] fd=48 method=GET url=/ connection=keep-alive
+ HttpServer.cpp:95
+20260620 11:23:33.095312 2543 INFO [conn-peer-close] fd=47 buffered_bytes=0 preview=""
+ Connection.cpp:112
+20260620 11:23:33.095331 2543 INFO [http-close] fd=47 reason=peer closed buffered_bytes=0
+ HttpServer.cpp:60
+20260620 11:23:33.095426 2544 INFO [conn-peer-close] fd=48 buffered_bytes=0 preview=""
+ Connection.cpp:112
+20260620 11:23:33.095458 2544 INFO [http-close] fd=48 reason=peer closed buffered_bytes=0
+ HttpServer.cpp:60
+20260620 11:23:48.561545 2800 INFO Http Server is running on port 9999 HttpServer.cpp:114
+20260620 11:23:48.561639 2800 INFO Server Start Now Server.cpp:42
